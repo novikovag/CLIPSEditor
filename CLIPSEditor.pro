@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets # help
+QT += core gui widgets help
 
 TARGET = clipseditor
 
