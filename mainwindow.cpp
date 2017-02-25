@@ -430,7 +430,7 @@ void MainWindow::addDock(QWidget* widget, QAction* action, QString title, Qt::Do
 {
     QDockWidget* dock = new QDockWidget(title);
 
-    action->setData(reinterpret_cast<int>(dock));
+    action->setData(reinterpret_cast<qlonglong>(dock));
 
     dock->setObjectName(widget->objectName()); // для сохранения настроек
     dock->setAllowedAreas(areas);
