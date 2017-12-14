@@ -15,6 +15,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QLineEdit" name="ledPath">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="acceptDrops">
         <bool>false</bool>
        </property>
