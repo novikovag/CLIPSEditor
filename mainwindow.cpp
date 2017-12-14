@@ -49,7 +49,7 @@ MainWindow::MainWindow(Config *config)
     menu->addAction(tr("Save As..."),       this, SLOT(saveFileAs()),    Qt::CTRL + Qt::ALT + Qt::Key_S);
     menu->addAction(tr("Save All"),         this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     menu->addAction(tr("Close All"),        this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
-
+    menu->addSeparator();
     QAction *action = menu->addAction(tr("Sessions"), this, SLOT(showDock()), Qt::CTRL + Qt::Key_W);
     addDock(sessions, action, tr("Sessions"),   Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     action = menu->addAction(tr("Snippets"),    this, SLOT(showDock()), Qt::CTRL + Qt::Key_P);
