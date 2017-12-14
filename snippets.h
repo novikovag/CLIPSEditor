@@ -30,7 +30,7 @@ class Snippets : public QWidget, private Ui::Snippets
     Q_OBJECT
 
 public:
-    Snippets(Config*);
+    Snippets(Config *);
    ~Snippets();
 
 signals:
@@ -45,7 +45,7 @@ private:
     void readPath(QString);
 
     QString snippet;
-    Config* config;
+    Config *config;
 };
 
 #endif // SNIPPETS_H

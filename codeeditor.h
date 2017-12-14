@@ -40,16 +40,16 @@ public:
     // previousBlockState и previousState перезаписывают статус, также как
     // и contentsChange()
     enum BlockState {
-        End         = 1,   // 00000001 конец блока
-        Begin       = 2,   // 00000010 начало блока
-        String      = 4,   // 00000100 признак незавершенной сторки (нет пары для ")
-        Comment     = 8,   // 00001000 строка является внешним комментарием
-        Nested      = 16,  // 00010000 признак вложенности
-        Folded      = 32,  // 00100000 блок свернут
-        Error       = 64,  // 01000000 строка содержит ошибку
-        Rehighlight = 128, // 10000000 блок необходимо переподсветить
+        End         = 1,     // 00000001 конец блока
+        Begin       = 2,     // 00000010 начало блока
+        String      = 4,     // 00000100 признак незавершенной сторки (нет пары для ")
+        Comment     = 8,     // 00001000 строка является внешним комментарием
+        Nested      = 16,    // 00010000 признак вложенности
+        Folded      = 32,    // 00100000 блок свернут
+        Error       = 64,    // 01000000 строка содержит ошибку
+        Rehighlight = 128,   // 10000000 блок необходимо переподсветить
         //Bookmark    = 256, // 100000000 закладка
-        Empty       = -1   // 1111.... новый/пустой блок
+        Empty       = -1     // 1111.... новый/пустой блок
     };
     // позиция последнего значащего бита, после которого идет значение вложенности,
     // равно велечине последнего элемента BlockState << 1
@@ -64,14 +64,15 @@ public:
 
     struct Bookmark : public QTextBlockUserData
     {
-        Bookmark(CodeEditor* editor, QTextBlock block)
+        Bookmark(CodeEditor *editor, QTextBlock block)
             : editor(editor), block(block), num(block.blockNumber()) { setActive(); }
 
         void setActive(bool active = true)
         {
             if (active)
                 emit editor->addBookmark(this);
-            else emit editor->removeBookmark(this);
+            else
+                emit editor->removeBookmark(this);
 
             isActive = active == true;
             editor->extraArea->update();
@@ -84,6 +85,7 @@ public:
             if (block.blockNumber() != num) {
                 if (isActive)
                     emit editor->moveBookmark(this, num);
+
                 num = block.blockNumber();
             }
         }
@@ -92,12 +94,13 @@ public:
 
         bool        isActive;
         int         num;
+
+        CodeEditor *editor;
         QTextBlock  block;
-        CodeEditor* editor;
     };
 
 public:
-    CodeEditor(Config*);
+    CodeEditor(Config *);
 
     QString wordHelp();
 
@@ -107,9 +110,9 @@ public:
 
 
 signals:
-    void addBookmark(CodeEditor::Bookmark*);
-    void moveBookmark(CodeEditor::Bookmark*, int);
-    void removeBookmark(CodeEditor::Bookmark*);
+    void addBookmark(CodeEditor::Bookmark *);
+    void moveBookmark(CodeEditor::Bookmark *, int);
+    void removeBookmark(CodeEditor::Bookmark *);
 
 private slots:
     void foldAll()        { foldUnfoldAll(); }
@@ -128,56 +131,51 @@ private slots:
     void reconfig(int = (Config::Init | Config::Editor));
 
 private:
-    void resizeEvent(QResizeEvent*);
-    void paintEvent(QPaintEvent*);
+    void resizeEvent(QResizeEvent *);
+    void paintEvent(QPaintEvent *);
 
-    void keyPressEvent(QKeyEvent*);
-    void mouseMoveEvent(QMouseEvent*);
-    void mousePressEvent(QMouseEvent*);
-    void contextMenuEvent(QContextMenuEvent*);
+    void keyPressEvent(QKeyEvent *);
+    void mouseMoveEvent(QMouseEvent *);
+    void mousePressEvent(QMouseEvent *);
+    void contextMenuEvent(QContextMenuEvent *);
 
-    bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject *, QEvent *);
     void extraAreaPaintEvent();
-    void extraAreaMouseEvent(QMouseEvent*);
+    void extraAreaMouseEvent(QMouseEvent *);
 
-    int  setBlockState(QTextBlock&);
+    int  setBlockState(QTextBlock &);
     QTextBlock findBlockByY(int);
 
-    void foldUnfold(QTextBlock&);
+    void foldUnfold(QTextBlock &);
     void foldUnfoldAll(bool = true);
 
-    void convertCase(bool toUpper = true)
-    {
-        textCursor().insertText(toUpper ? textCursor().selectedText().toUpper() :
-                                          textCursor().selectedText().toLower());
-    }
+    void convertCase(bool toUpper = true) { textCursor().insertText(toUpper ? textCursor().selectedText().toUpper() : textCursor().selectedText().toLower()); }
 
-    Highlighter*   highlighter;
-    QCompleter*    completer;
+    Highlighter* highlighter;
+    QCompleter*  completer;
 
-    QTextBlock     pointedBlock;
+    QTextBlock   pointedBlock;
 
-    QWidget*       extraArea;
+    QWidget*     extraArea;
 
-    int            lineNumDigits;
-    int            lineNumWidth;
+    int          lineNumDigits;
+    int          lineNumWidth;
 
-    int            foldBoxWidth;
-    int            foldBoxIndent;
-    int            foldBoxLength;
+    int          foldBoxWidth;
+    int          foldBoxIndent;
+    int          foldBoxLength;
 
-    int            markWidth; // от размера шрифта
+    int          markWidth; // от размера шрифта
 
-    Config*        config;
+    Config*      config;
 
-    QMenu*         menu;
+    QMenu*       menu;
 
-    QImage         mark;
+    QImage       mark;
 
     QList<QKeySequence> shortcuts;
 };
-
 // конвертация в QVariant
-Q_DECLARE_METATYPE(CodeEditor::Bookmark*)
+Q_DECLARE_METATYPE(CodeEditor::Bookmark *)
 
 #endif // CODEEDITOR_H

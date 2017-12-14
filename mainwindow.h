@@ -31,8 +31,7 @@
 #include "bookmarks.h"
 
 #define EDITOR static_cast<CodeEditor*>(tabWidget->currentWidget())
-#define FSNAME(a) QString("%1#%2").arg(tabWidget->widget(a)->windowFilePath()). \
-                                   arg(EDITOR->textCursor().position())
+#define FSNAME(a) QString("%1#%2").arg(tabWidget->widget(a)->windowFilePath()).arg(EDITOR->textCursor().position())
 
 class MainWindow : public QMainWindow
 {
@@ -46,9 +45,12 @@ private slots:
     void openFile(QString = "");
     void openFiles(QStringList);
     void openRecentFile() { openFile((static_cast<QAction*>(sender()))->data().toString()); }
-
     // deleteLater вызывает деструктор BookmarkData при закрытии вкладки
-    void closeFile() { if (maybeSave()) tabWidget->currentWidget()->deleteLater(); }
+    void closeFile()
+    {
+        if (maybeSave())
+            tabWidget->currentWidget()->deleteLater();
+    }
 #ifdef SETSTYLE
     void setStyle();
 #endif
@@ -76,38 +78,43 @@ private slots:
     void showDock();
 
 private:
-    void closeEvent(QCloseEvent*);
-    void dragEnterEvent(QDragEnterEvent* e)  { if (e->mimeData()->hasText()) e->acceptProposedAction(); }
-    void dropEvent(QDropEvent*);
+    void closeEvent(QCloseEvent *);
+    void dragEnterEvent(QDragEnterEvent *e)
+    {
+        if (e->mimeData()->hasText())
+            e->acceptProposedAction();
+    }
+
+    void dropEvent(QDropEvent *);
 
     bool maybeSave();
-    void setCurrentFile(QString&);
-    void loadFile(QString&);
-    bool saveFile(QString&);
+    void setCurrentFile(QString &);
+    void loadFile(QString &);
+    bool saveFile(QString &);
 
     QString currentPath();
 
-    void addDock(QWidget*, QAction*, QString, Qt::DockWidgetArea, Qt::DockWidgetAreas = Qt::AllDockWidgetAreas);
+    void addDock(QWidget *, QAction *, QString, Qt::DockWidgetArea, Qt::DockWidgetAreas = Qt::AllDockWidgetAreas);
 
-    int             fileNum;
-    QString			lastPath;
+    int              fileNum;
+    QString			 lastPath;
 
-    QList<QAction*> menuActs; // [0] - saveAct, [1] - separatorAct
-    QList<QAction*> recentFileActs;
+    QList<QAction *> menuActs; // [0] - saveAct, [1] - separatorAct
+    QList<QAction *> recentFileActs;
 
-    QTabWidget*     tabWidget;
-    ConfigDialog*   configDialog;
-    Sessions*       sessions;
-    Snippets*       snippets;
-    SearchBar*      searchBar;
-    Bookmarks*      bookmarks;
-    HelpViewer*     helpViewer;
+    QTabWidget      *tabWidget;
+    ConfigDialog    *configDialog;
+    Sessions        *sessions;
+    Snippets        *snippets;
+    SearchBar       *searchBar;
+    Bookmarks       *bookmarks;
+    HelpViewer      *helpViewer;
 
-    QShortcut*      searchShort;
+    QShortcut       *searchShort;
 
-    Config*         config;
+    Config          *config;
 
-    QLabel*         status;
+    QLabel          *status;
 };
 
 #endif // MAINWINDOW_H

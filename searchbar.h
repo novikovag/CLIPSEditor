@@ -42,6 +42,7 @@ public:
 public:
     SearchBar(Config*);
    ~SearchBar();
+
     void searchText(QString txt) { cmbFind->setCurrentText(txt); }
 
 signals:
@@ -51,9 +52,9 @@ private slots:
     void clicked();
 
 private:
-    void update(QComboBox*);
+    void update(QComboBox *);
 
-    Config* config;
+    Config *config;
 };
 
 #endif // SEARCHBAR_H

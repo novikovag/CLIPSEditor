@@ -18,13 +18,13 @@
 
 #include "searchbar.h"
 
-SearchBar::SearchBar(Config* config)
+SearchBar::SearchBar(Config *config)
     : config(config)
 {
     setupUi(this);
 
     QRegExp rx("^[^\\n]+&"); // толкько одну строку
-    QRegExpValidator* v = new QRegExpValidator(rx, this);
+    QRegExpValidator *v = new QRegExpValidator(rx, this);
 
     cmbFind->setMaxCount(config->maxHistory);
     cmbFind->addItems(config->findHistory);
@@ -73,15 +73,15 @@ void SearchBar::clicked()
     if (sender() == btnFindPrev || sender() == btnReplacePrev)
         flags |= Backward;
 
-    if (sender() == btnFindNext || sender() == btnFindPrev)
+    if (sender() == btnFindNext || sender() == btnFindPrev) {
         emit searchReplace(cmbFind->currentText(), 0, flags);
-    else if (cmbFind->currentText() != cmbReplace->currentText()) {
+    } else if (cmbFind->currentText() != cmbReplace->currentText()) {
         update(cmbReplace);
         emit searchReplace(cmbFind->currentText(), cmbReplace->currentText(), flags);
     }
 }
 
-void SearchBar::update(QComboBox* combo)
+void SearchBar::update(QComboBox *combo)
 {
     int index = combo->findText(combo->currentText());
 

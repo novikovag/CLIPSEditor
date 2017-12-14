@@ -18,7 +18,7 @@
 
 #include "configdialog.h"
 
-ConfigDialog::ConfigDialog(Config* config)
+ConfigDialog::ConfigDialog(Config *config)
     : config(config)
 {
     setupUi(this);
@@ -42,7 +42,7 @@ ConfigDialog::ConfigDialog(Config* config)
     while (it.hasNext()) {
         it.next();
 
-        QListWidgetItem* item = new QListWidgetItem(it.key(), lstScheme);
+        QListWidgetItem *item = new QListWidgetItem(it.key(), lstScheme);
 
         item->setForeground(it.value().foreground());
         item->setBackground(it.value().background());
@@ -62,7 +62,7 @@ ConfigDialog::ConfigDialog(Config* config)
     connect(tlbBackground, SIGNAL(clicked()), SLOT(setColor()));
     connect(chbBold,       SIGNAL(clicked()), SLOT(setFont()));
     connect(chbItalic,     SIGNAL(clicked()), SLOT(setFont()));
-    connect(lstScheme,     SIGNAL(itemClicked(QListWidgetItem*)), SLOT(setScheme(QListWidgetItem*)));
+    connect(lstScheme,     SIGNAL(itemClicked(QListWidgetItem *)),      SLOT(setScheme(QListWidgetItem *)));
     connect(btnBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), SLOT(applay()));
     connect(btnBox->button(QDialogButtonBox::Ok),    SIGNAL(clicked()), SLOT(applay()));
 }
@@ -70,8 +70,7 @@ ConfigDialog::ConfigDialog(Config* config)
 void ConfigDialog::applay()
 {
     if (config->language != cmbLanguage->currentText())
-        QMessageBox::information(this, tr("Restart required"),
-                                       tr("The language change will take effect after a restart editor"));
+        QMessageBox::information(this, tr("Restart required"), tr("The language change will take effect after a restart editor"));
 
     config->language     = cmbLanguage->currentText();
     config->fontFamily   = cmbFont->currentFont().family();
@@ -86,7 +85,7 @@ void ConfigDialog::applay()
     config->verticalEdge = spnVerticalEdge->value();
 
     for (int i = 0; i < lstScheme->count(); i++) {
-        QListWidgetItem* item = lstScheme->item(i);
+        QListWidgetItem *item = lstScheme->item(i);
         QTextCharFormat  fmt;
 
         fmt.setForeground(item->foreground());
@@ -107,7 +106,7 @@ void ConfigDialog::setFont()
     lstScheme->currentItem()->setFont(font);
 }
 
-void ConfigDialog::setScheme(QListWidgetItem* item)
+void ConfigDialog::setScheme(QListWidgetItem *item)
 {
     chbBold->setChecked(item->font().bold());
     chbItalic->setChecked(item->font().italic());
@@ -117,7 +116,7 @@ void ConfigDialog::setScheme(QListWidgetItem* item)
 
 void ConfigDialog::setColor()
 {
-    QColor color = QColorDialog::getColor(static_cast<QToolButton*>(sender())->palette().background().color());
+    QColor color = QColorDialog::getColor(static_cast<QToolButton *>(sender())->palette().background().color());
 
     if (color.isValid()) {
         if (sender() == tlbForeground)
@@ -125,6 +124,6 @@ void ConfigDialog::setColor()
         else
             lstScheme->currentItem()->setBackground(color);
 
-        static_cast<QToolButton*>(sender())->setStyleSheet(STYLE(color));
+        static_cast<QToolButton *>(sender())->setStyleSheet(STYLE(color));
     }
 }

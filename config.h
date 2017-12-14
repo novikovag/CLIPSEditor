@@ -26,7 +26,7 @@
 #define ORGNAME  "NovikovAG"
 
 #define PROGNAME "CLIPS Editor"
-#define VERSION  "1.1"
+#define VERSION  "1.2"
 
 class Config : public QSettings
 {
@@ -48,7 +48,6 @@ public slots:
 public:
     Config();
    ~Config();
-
     // General
     QString     language;
     QMap<QString, QString> languages;
@@ -69,7 +68,6 @@ public:
 
     QMap<QString, QVariant>	sessions;
     bool		leaveOpen;
-
     // Editor
     QString     fontFamily;
     int         fontSize;
@@ -85,7 +83,6 @@ public:
     bool        whitespaces;
 
     int         verticalEdge;
-
     // Search
     int         maxHistory;
     QStringList findHistory;
@@ -94,11 +91,9 @@ public:
     bool        matchCase;
     bool        regExp;
     bool        allFiles;
-
     // Highlighter
     QMap<QString, QTextCharFormat> colorScheme;
     QMultiHash<QString, QRegExp>   patterns;
-
     // Highlighter, Completer
     Keywords    keywords;
     QStringList keywordsSorted;

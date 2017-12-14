@@ -18,7 +18,7 @@
 
 #include "sessions.h"
 
-Sessions::Sessions(Config* config, QTabWidget* tabWidget)
+Sessions::Sessions(Config *config, QTabWidget *tabWidget)
     : config(config), tabWidget(tabWidget)
 {
     setupUi(this);
@@ -28,7 +28,7 @@ Sessions::Sessions(Config* config, QTabWidget* tabWidget)
     while (it.hasNext()) {
         it.next();
 
-        QListWidgetItem* item = new QListWidgetItem(it.key(), lstSessions);
+        QListWidgetItem *item = new QListWidgetItem(it.key(), lstSessions);
         item->setData(Qt::UserRole, it.value());
         item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
@@ -38,10 +38,10 @@ Sessions::Sessions(Config* config, QTabWidget* tabWidget)
     menu->addAction(tr("Update"), this, SLOT(update()));
     menu->addAction(tr("Remove"), this, SLOT(remove()));
 
-    connect(btnAdd,      SIGNAL(clicked()), SLOT(add()));
-    connect(lstSessions, SIGNAL(itemSelectionChanged()), SLOT(select()));
-    connect(lstSessions, SIGNAL(itemDoubleClicked(QListWidgetItem*)),       SLOT(clicked(QListWidgetItem*)));
-    connect(lstSessions, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(clicked(const QPoint&)));
+    connect(btnAdd,      SIGNAL(clicked()),                                  SLOT(add()));
+    connect(lstSessions, SIGNAL(itemSelectionChanged()),                     SLOT(select()));
+    connect(lstSessions, SIGNAL(itemDoubleClicked(QListWidgetItem *)),       SLOT(clicked(QListWidgetItem *)));
+    connect(lstSessions, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(clicked(const QPoint &)));
 }
 
 void Sessions::add()
@@ -58,7 +58,7 @@ void Sessions::add()
             }
 
         if (!txt.isEmpty()) {
-            QListWidgetItem* item = new QListWidgetItem(ledSession->text(), lstSessions);
+            QListWidgetItem *item = new QListWidgetItem(ledSession->text(), lstSessions);
             item->setData(Qt::UserRole, txt);
             item->setFlags(item->flags() | Qt::ItemIsEditable);
             ledSession->clear();
@@ -68,7 +68,7 @@ void Sessions::add()
 
 void Sessions::remove()
 {
-    QListIterator<QListWidgetItem*> it(lstSessions->selectedItems());
+    QListIterator<QListWidgetItem *> it(lstSessions->selectedItems());
 
     while (it.hasNext())
         delete it.next();

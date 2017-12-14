@@ -18,7 +18,7 @@
 
 #include "highlighter.h"
 
-Highlighter::Highlighter(Config* config, CodeEditor* codeEditor)
+Highlighter::Highlighter(Config *config, CodeEditor *codeEditor)
     : QSyntaxHighlighter(codeEditor->document()), config(config), codeEditor(codeEditor)
 {
     errorFmt.setUnderlineColor(Qt::red);
@@ -29,12 +29,11 @@ Highlighter::Highlighter(Config* config, CodeEditor* codeEditor)
 
     mismatchFmt.setForeground(Qt::red);
 
-    connect(codeEditor, SIGNAL(cursorPositionChanged()), SLOT(matchParentheses()));
-    disconnect(codeEditor->document(), SIGNAL(contentsChange(int, int, int)), this,
-                                       SLOT(_q_reformatBlocks(int, int, int)));
+    connect(codeEditor,                SIGNAL(cursorPositionChanged()),             SLOT(matchParentheses()));
+    disconnect(codeEditor->document(), SIGNAL(contentsChange(int, int, int)), this, SLOT(_q_reformatBlocks(int, int, int)));
 }
 
-void Highlighter::highlightBlock(const QString& txt)
+void Highlighter::highlightBlock(const QString &txt)
 {
     int state = currentBlockState();
 
@@ -59,9 +58,7 @@ void Highlighter::highlightBlock(const QString& txt)
             while ((i = rx.indexIn(txt, i + len)) > -1)
                 setFormat(i, (len = rx.matchedLength()), config->colorScheme.value(it.key()));
         }
-
         // --- строки и комментарии ---
-
         state = previousBlockState();
 
         QQueue<int> indexes;
@@ -118,8 +115,7 @@ void Highlighter::matchParentheses()
             pos -= 2;
         }
 
-        cursor.movePosition(forward ? QTextCursor::NextCharacter :
-                                      QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+        cursor.movePosition(forward ? QTextCursor::NextCharacter : QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
 
         QTextCharFormat fmt = mismatchFmt;
 
@@ -139,7 +135,6 @@ void Highlighter::matchParentheses()
                     selections.append(selection);
 
                     fmt = matchFmt;
-
                     break;
                 }
             }

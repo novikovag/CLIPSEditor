@@ -93,13 +93,11 @@ Config::Config()
         if (!colorScheme.contains(hi.key())) // для всех слов пустая схема при size == 0
             colorScheme.insert(hi.key(), fmt);
     }
-
     // 1. для неключевых слов добавить шаблон
     patterns.insert("Parentheses", 	    QRegExp("[\\(\\)\\[\\]]"));
     patterns.insert("Numbers", 			QRegExp("(^|\\s)[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"));
     patterns.insert("Local Variables",  QRegExp("\\$?\\?[\\w-]+"));
     patterns.insert("Global Variables", QRegExp("\\?\\*[\\w-]+\\*"));
-
     // 2. настроить схему по умолчанию
     if (!size) {
         colorScheme.insert("Constructs", fmt);

@@ -31,9 +31,9 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 
 public:
-    Highlighter(Config*, CodeEditor*);
+    Highlighter(Config *, CodeEditor *);
 
-    void highlightBlock(const QString&);
+    void highlightBlock(const QString &);
 
 private slots:
     void matchParentheses();
@@ -45,8 +45,8 @@ private:
     QTextCharFormat matchFmt;
     QTextCharFormat mismatchFmt;
 
-    Config*         config;
-    CodeEditor*     codeEditor;
+    Config         *config;
+    CodeEditor     *codeEditor;
 };
 
 #endif // HIGHLIGHTER_H

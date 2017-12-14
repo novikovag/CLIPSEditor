@@ -31,19 +31,19 @@ class HelpViewer : public QWidget, private Ui::HelpViewer
     Q_OBJECT
 
 public:
-    HelpViewer(Config*);
-    void setIndex(const QString&);
+    HelpViewer(Config *);
+    void setIndex(const QString &);
 
 private slots:
-    void loadSource(const QUrl&);
+    void loadSource(const QUrl &);
 
 private:
-    void closeEvent(QCloseEvent*) { config->helpWindowGeometry = saveGeometry(); }
+    void closeEvent(QCloseEvent *) { config->helpWindowGeometry = saveGeometry(); }
 
     QFile        helpFiles[2]; // qhc, qch
 
-    QHelpEngine* helpEngine;
-    Config*      config;
+    QHelpEngine *helpEngine;
+    Config      *config;
 };
 
 #endif // MAINWINDOW_H

@@ -32,26 +32,25 @@ class Bookmarks : public QWidget, private Ui::Bookmarks
     Q_OBJECT
 
 public:
-    Bookmarks(QTabWidget*);
+    Bookmarks(QTabWidget *);
 
 signals:
-    void toBookmark(CodeEditor::Bookmark*);
+    void toBookmark(CodeEditor::Bookmark *);
 
 public slots:
-    void addBookmark(CodeEditor::Bookmark*);
+    void addBookmark(CodeEditor::Bookmark *);
 
     void moveBookmark(CodeEditor::Bookmark*  mark, int)
     {
         // при переименование может теряться маркер '^\\d+'
-        map[mark]->setText(map[mark]->text().replace(QRegExp("^\\d+:"),
-                                                     QString("%1:").arg(mark->block.blockNumber() + 1)));
+        map[mark]->setText(map[mark]->text().replace(QRegExp("^\\d+:"), QString("%1:").arg(mark->block.blockNumber() + 1)));
     }
 
-    void removeBookmark(CodeEditor::Bookmark*);
+    void removeBookmark(CodeEditor::Bookmark *);
 
-    void clicked(QListWidgetItem*);
+    void clicked(QListWidgetItem *);
 
-    void clicked(const QPoint& point)
+    void clicked(const QPoint &point)
     {
         if (lstBookmarks->itemAt(point))
             menu->exec(mapToGlobal(point));
@@ -59,16 +58,12 @@ public slots:
 
     void rename() { lstBookmarks->editItem(lstBookmarks->currentItem()); }
 
-    void remove()
-    {
-        lstBookmarks->currentItem()->data(Qt::UserRole).
-                                     value<CodeEditor::Bookmark*>()->setActive(false);
-    }
+    void remove() { lstBookmarks->currentItem()->data(Qt::UserRole).value<CodeEditor::Bookmark*>()->setActive(false); }
 
 private:
-    QMenu*          menu;
-    QTabWidget*     tabWidget;
-    QMap<CodeEditor::Bookmark*, QListWidgetItem*> map;
+    QMenu      *menu;
+    QTabWidget *tabWidget;
+    QMap<CodeEditor::Bookmark *, QListWidgetItem *> map;
 };
 
 #endif // BOOKMARKS_H

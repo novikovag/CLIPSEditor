@@ -30,7 +30,7 @@ class Sessions : public QWidget, private Ui::Sessions
     Q_OBJECT
 
 public:
-    Sessions(Config*, QTabWidget*);
+    Sessions(Config *, QTabWidget *);
    ~Sessions();
 
 signals:
@@ -44,10 +44,7 @@ private slots:
 
     void rename() { lstSessions->editItem(lstSessions->currentItem()); }
 
-    void clicked(QListWidgetItem* item)
-    {
-        emit load(item->data(Qt::UserRole).toString().split("\n"), chbLeaveTabs->isChecked());
-    }
+    void clicked(QListWidgetItem* item) { emit load(item->data(Qt::UserRole).toString().split("\n"), chbLeaveTabs->isChecked()); }
 
     void clicked(const QPoint& point)
     {
@@ -56,9 +53,9 @@ private slots:
     }
 
 private:
-    QMenu*      menu;
-    QTabWidget* tabWidget;
-    Config* 	config;
+    QMenu      *menu;
+    QTabWidget *tabWidget;
+    Config 	   *config;
 };
 
 #endif // SESSIONS_H

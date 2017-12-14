@@ -33,11 +33,11 @@ class ConfigDialog : public QDialog, private Ui::ConfigDialog
     Q_OBJECT
 
 public:
-    ConfigDialog(Config*);
+    ConfigDialog(Config *);
 
 private slots:
     void setFont();
-    void setScheme(QListWidgetItem*);
+    void setScheme(QListWidgetItem *);
     void setColor();
     void applay();
 

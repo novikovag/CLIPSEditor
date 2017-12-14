@@ -18,43 +18,41 @@
 
 #include "bookmarks.h"
 
-Bookmarks::Bookmarks(QTabWidget* tabWidget)
+Bookmarks::Bookmarks(QTabWidget *tabWidget)
     : tabWidget(tabWidget)
 {
     setupUi(this);
 
     menu = new QMenu();
-    menu->addAction(tr("Rename"),  this, SLOT(rename())); //  QKeySequence::?
-    menu->addAction(tr("Remove"),  this, SLOT(remove()));
+    menu->addAction(tr("Rename"), this, SLOT(rename())); // QKeySequence::?
+    menu->addAction(tr("Remove"), this, SLOT(remove()));
 
     // флаги перетаскивание установленны в форме
     // setDropIndicatorShown(true)
     // setDefaultDropAction(Qt::TargetMoveAction)
     // setDragDropMode(QAbstractItemView::InternalMove)
 
-    connect(lstBookmarks, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(clicked(QListWidgetItem*)));
+    connect(lstBookmarks, SIGNAL(itemDoubleClicked(QListWidgetItem *)),       SLOT(clicked(QListWidgetItem *)));
     // если установлен флаг setContextMenuPolicy(Qt::CustomContextMenu)
-    connect(lstBookmarks, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(clicked(const QPoint&)));
+    connect(lstBookmarks, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(clicked(const QPoint &)));
 }
 
-void Bookmarks::addBookmark(CodeEditor::Bookmark* mark)
+void Bookmarks::addBookmark(CodeEditor::Bookmark *mark)
 {
-    QListWidgetItem* item = new QListWidgetItem(QString("%1: %2 %3").
-                                                        arg(mark->block.blockNumber() + 1).
-                                                        arg(tabWidget->currentWidget()->windowTitle().remove("[*]")).
+    QListWidgetItem *item = new QListWidgetItem(QString("%1: %2 %3").arg(mark->block.blockNumber() + 1).arg(tabWidget->currentWidget()->windowTitle().remove("[*]")).
                                                         arg(mark->block.text()), lstBookmarks);
     item->setData(Qt::UserRole, QVariant::fromValue(mark));
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     map[mark] = item;
 }
 
-void Bookmarks::removeBookmark(CodeEditor::Bookmark* mark)
+void Bookmarks::removeBookmark(CodeEditor::Bookmark *mark)
 {
    delete map[mark];
    map.remove(mark);
 }
 
-void Bookmarks::clicked(QListWidgetItem* item)
+void Bookmarks::clicked(QListWidgetItem *item)
 {
     for (int i = 0; i < tabWidget->count(); i++) {
         if (tabWidget->widget(i) == DATAMARK->editor) {

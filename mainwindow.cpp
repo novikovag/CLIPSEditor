@@ -18,7 +18,7 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(Config* config)
+MainWindow::MainWindow(Config *config)
     : config(config)
 {
     fileNum = 0;
@@ -31,14 +31,14 @@ MainWindow::MainWindow(Config* config)
     snippets     = new Snippets(config);
     searchBar    = new SearchBar(config);   
     helpViewer   = new HelpViewer(config);
-    configDialog = new ConfigDialog(config);//, this);
+    configDialog = new ConfigDialog(config);
     bookmarks    = new Bookmarks(tabWidget);
 
     status = new QLabel();
     status->setIndent(50);
     statusBar()->addWidget(status, 1);
 
-    QMenu* menu = menuBar()->addMenu(tr("&File"));
+    QMenu *menu = menuBar()->addMenu(tr("&File"));
     connect(menu, SIGNAL(aboutToShow()), this, SLOT(updateRecentFiles()));
 #ifdef SETSTYLE
     menu->addAction(tr("#Set Style..."),    this, SLOT(setStyle()));
@@ -50,9 +50,9 @@ MainWindow::MainWindow(Config* config)
     menu->addAction(tr("Save All"),         this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     menu->addAction(tr("Close All"),        this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
 
-    QAction* action = menu->addAction(tr("Sessions"), this, SLOT(showDock()), Qt::CTRL + Qt::Key_W);
+    QAction *action = menu->addAction(tr("Sessions"), this, SLOT(showDock()), Qt::CTRL + Qt::Key_W);
     addDock(sessions, action, tr("Sessions"),   Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    action = menu->addAction(tr("Snippets"),    this, SLOT(showDock()),  Qt::CTRL + Qt::Key_P);
+    action = menu->addAction(tr("Snippets"),    this, SLOT(showDock()), Qt::CTRL + Qt::Key_P);
     addDock(snippets, action, tr("Snippets"),   Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     action = menu->addAction(tr("Bookmarks"),   this, SLOT(showDock()), Qt::CTRL + Qt::Key_B);
     addDock(bookmarks, action, tr("Bookmarks"), Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -64,7 +64,7 @@ MainWindow::MainWindow(Config* config)
     menuActs << menu->addSeparator();
 
     for (int i = 0; i < config->maxRecentFiles; i++) {
-        QAction* action = menu->addAction("", this, SLOT(openRecentFile()));
+        QAction *action = menu->addAction("", this, SLOT(openRecentFile()));
         action->setVisible(false);
         recentFileActs << action;
     }
@@ -99,11 +99,11 @@ MainWindow::MainWindow(Config* config)
 
     currentChanged(i);
 
-    connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(currentChanged(int)));
-    connect(tabWidget, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(tabContextMenu(const QPoint &)));
-    connect(sessions,  SIGNAL(load(QStringList, bool)), SLOT(loadSession(QStringList, bool)));
-    connect(snippets,  SIGNAL(insert(QString)), SLOT(insertSnippet(QString)));
-    connect(searchBar, SIGNAL(searchReplace(QString, QString, int)),  SLOT(searchReplace(QString, QString, int)));
+    connect(tabWidget, SIGNAL(currentChanged(int)),                        SLOT(currentChanged(int)));
+    connect(tabWidget, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(tabContextMenu(const QPoint &)));
+    connect(sessions,  SIGNAL(load(QStringList, bool)),                    SLOT(loadSession(QStringList, bool)));
+    connect(snippets,  SIGNAL(insert(QString)),                            SLOT(insertSnippet(QString)));
+    connect(searchBar, SIGNAL(searchReplace(QString, QString, int)),       SLOT(searchReplace(QString, QString, int)));
 
     tabWidget->tabBar()->setAccessibleName("one"); 
 }
@@ -116,7 +116,7 @@ void MainWindow::newFile()
     tabWidget->currentWidget()->setWindowTitle(name);
 }
 
-void MainWindow::dropEvent(QDropEvent* e)
+void MainWindow::dropEvent(QDropEvent *e)
 {
     QStringList names;
 
@@ -139,8 +139,7 @@ void MainWindow::openFile(QString name)
 void MainWindow::openFiles(QStringList names)
 {
     foreach (QString name, names) {
-        if (!(tabWidget->count() == 1 && !EDITOR->document()->isModified() &&
-            tabWidget->currentWidget()->windowFilePath().isEmpty()))
+        if (!(tabWidget->count() == 1 && !EDITOR->document()->isModified() && tabWidget->currentWidget()->windowFilePath().isEmpty()))
             newFile();
 
         loadFile(name);
@@ -212,10 +211,7 @@ void MainWindow::searchReplace(QString str1, QString str2, int flags)
             }
         else
             EDITOR->replaceAll(str1, str2, flags);
-    } else if ((str2.isNull() && !EDITOR->search(str1, flags) ||
-               !str2.isNull() && !EDITOR->replace(str1, str2, flags)) &&
-               flags & SearchBar::AllFiles) {
-
+    } else if ((str2.isNull() && !EDITOR->search(str1, flags) || !str2.isNull() && !EDITOR->replace(str1, str2, flags)) && flags & SearchBar::AllFiles) {
         if (flags & SearchBar::Backward) {
             if (tabWidget->currentIndex() != 0) {
                 tabWidget->setCurrentIndex(tabWidget->currentIndex() - 1);
@@ -239,7 +235,6 @@ void MainWindow::help()
 void MainWindow::tabContextMenu(const QPoint& point)
 {
     int i = tabWidget->tabBar()->tabAt(point);
-
     // иначе отработка также на extraArea
     if (tabWidget->tabBar()->tabRect(i).contains(point)) {
         tabWidget->setCurrentIndex(i);
@@ -251,13 +246,14 @@ void MainWindow::modificationChanged(bool changed)
 {
     QString str = tabWidget->tabText(tabWidget->currentIndex());
 
-    if (str[str.length() - 1] == '*')
+    if (str[str.length() - 1] == '*') {
         if (changed)
             return;
-        else
-            str.resize(str.length() - 1);
-    else if (changed)
-        str  += '*';
+
+        str.resize(str.length() - 1);
+    } else if (changed) {
+        str += '*';
+    }
 
     tabWidget->setTabText(tabWidget->currentIndex(), str);
     menuActs[0]->setEnabled(changed); // saveAct
@@ -268,11 +264,10 @@ void MainWindow::cursorPositionChanged()
     QTextCursor cursor = EDITOR->textCursor();
 
     status->setText(tr("Ln: %1 Col: %2 Sel: %3|%4").
-                       arg(cursor.blockNumber() + 1).
+                       arg(cursor.blockNumber()  + 1).
                        arg(cursor.columnNumber() + 1).
-                       arg(cursor.selectedText().isEmpty() ? 0 :
-                           EDITOR->document()->findBlock(cursor.selectionEnd()).blockNumber() -
-                           EDITOR->document()->findBlock(cursor.selectionStart()).blockNumber() + 1).
+                       arg(cursor.selectedText().isEmpty() ? 0 : EDITOR->document()->findBlock(cursor.selectionEnd()).blockNumber()   -
+                                                                 EDITOR->document()->findBlock(cursor.selectionStart()).blockNumber() + 1).
                        arg(cursor.selectedText().length()));
 }
 
@@ -289,12 +284,9 @@ void MainWindow::currentChanged(int i)
     connect(EDITOR, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
     connect(EDITOR, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()),   Qt::UniqueConnection);
 
-    connect(EDITOR,    SIGNAL(addBookmark(CodeEditor::Bookmark*)),
-            bookmarks, SLOT(addBookmark(CodeEditor::Bookmark*)),   Qt::UniqueConnection);
-    connect(EDITOR,    SIGNAL(moveBookmark(CodeEditor::Bookmark*,  int)),
-            bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark*, int)), Qt::UniqueConnection);
-    connect(EDITOR,    SIGNAL(removeBookmark(CodeEditor::Bookmark*)),
-            bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark*)), Qt::UniqueConnection);
+    connect(EDITOR, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)),       Qt::UniqueConnection);
+    connect(EDITOR, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)), Qt::UniqueConnection);
+    connect(EDITOR, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)),    Qt::UniqueConnection);
 }
 
 void MainWindow::updateRecentFiles()
@@ -311,7 +303,9 @@ void MainWindow::updateRecentFiles()
             recentFileActs[c]->setData(fileName);
             recentFileActs[c]->setVisible(true);
             c++;
-        } else config->recentFiles.removeAll(fileName);
+        } else {
+            config->recentFiles.removeAll(fileName);
+        }
     }
 
     menuActs[1]->setVisible(c); // separatorAct
@@ -320,12 +314,8 @@ void MainWindow::updateRecentFiles()
 bool MainWindow::maybeSave()
 {
     if (EDITOR->document()->isModified()) {
-        QMessageBox::StandardButton ret = QMessageBox::warning(this, tr(PROGNAME),
-                                                               tr("The file has been modified.\n"
-                                                                  "Do you want to save your changes?"),
-                                                               QMessageBox::Save |
-                                                               QMessageBox::Discard |
-                                                               QMessageBox::Cancel);
+        QMessageBox::StandardButton ret = QMessageBox::warning(this, tr(PROGNAME), tr("Do you want to save your changes?"),
+                                                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if (ret == QMessageBox::Save)
             return saveFile();
         else if (ret == QMessageBox::Cancel)
@@ -356,7 +346,6 @@ void MainWindow::setCurrentFile(QString& name)
 void MainWindow::loadFile(QString& name)
 {
     QStringList names = name.split('#');
-
     // нет позиции, например загрузка из сессии
     if (names.count() == 1)
         names << "0";
@@ -364,9 +353,7 @@ void MainWindow::loadFile(QString& name)
     QFile file(names[0]);
 
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(PROGNAME),
-                             tr("Cannot read file %1:\n%2").
-                             arg(name, file.errorString()));
+        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot read file %1: %2").arg(name, file.errorString()));
     } else {
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -392,9 +379,7 @@ bool MainWindow::saveFile(QString& name)
     QFile file(name);
 
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(PROGNAME),
-                             tr("Cannot write file %1:\n%2").
-                             arg(name, file.errorString()));
+        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot write file %1: %2").arg(name, file.errorString()));
         return false;
     }
 
@@ -416,8 +401,7 @@ bool MainWindow::saveFile(QString& name)
 
 QString MainWindow::currentPath()
 {
-    if (!tabWidget->currentWidget()->windowFilePath().isEmpty() &&
-        QDir(QFileInfo(tabWidget->currentWidget()->windowFilePath()).path()).exists())
+    if (!tabWidget->currentWidget()->windowFilePath().isEmpty() && QDir(QFileInfo(tabWidget->currentWidget()->windowFilePath()).path()).exists())
         return QFileInfo(tabWidget->currentWidget()->windowFilePath()).path();
 
     if (!lastPath.isEmpty() && QDir(lastPath).exists())
@@ -426,9 +410,9 @@ QString MainWindow::currentPath()
     return QDir::homePath();
 }
 
-void MainWindow::addDock(QWidget* widget, QAction* action, QString title, Qt::DockWidgetArea area, Qt::DockWidgetAreas areas)
+void MainWindow::addDock(QWidget *widget, QAction *action, QString title, Qt::DockWidgetArea area, Qt::DockWidgetAreas areas)
 {
-    QDockWidget* dock = new QDockWidget(title);
+    QDockWidget *dock = new QDockWidget(title);
 
     action->setData(reinterpret_cast<qlonglong>(dock));
 
@@ -441,7 +425,7 @@ void MainWindow::addDock(QWidget* widget, QAction* action, QString title, Qt::Do
 
 void MainWindow::showDock()
 {
-    QDockWidget* dock = reinterpret_cast<QDockWidget*>(static_cast<QAction*>(sender())->data().toInt());
+    QDockWidget *dock = reinterpret_cast<QDockWidget *>(static_cast<QAction *>(sender())->data().toInt());
 
     if (dock->objectName() == "SearchBar" && dock->isHidden()) {
         QTextCursor cursor = EDITOR->textCursor();
@@ -459,18 +443,13 @@ void MainWindow::about()
                              tr("<h3>%1 v%2</h3>"
                                 "<p>Based on Qt v%3</p>"
                                 "<p>Built on %4 at %5</p>"
-                                "<p>Author: <a href='mailto:novikovag@gmail.com?subject=%6'>"
-                                    "Novikov Artem Gennadievich</a></p>"
-                                "<p>Project page: "
-                                    "<a href='https://github.com/novikovag/CLIPSEditor'>"
-                                    "github</a>"
-                                    "</p>"
-                                "<p>License: <a href='http://www.gnu.org/licenses/gpl.html'>"
-                                    "GNU GPL v3</a></p>").
+                                "<p>Author: <a href='mailto:novikovag@gmail.com?subject=%6'>Artem G. Novikov</a></p>"
+                                "<p>Project page: <a href='https://github.com/novikovag/CLIPSEditor'>github</a></p>"
+                                "<p>License: <a href='http://www.gnu.org/licenses/gpl.html'>GNU GPL v3</a></p>").
                                 arg(PROGNAME, VERSION, QT_VERSION_STR, __DATE__, __TIME__, PROGNAME));
 }
 
-void MainWindow::closeEvent(QCloseEvent* e)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
     config->openFiles.clear();
     config->lastFile = FSNAME(tabWidget->currentIndex());
@@ -488,12 +467,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
     }
 
     helpViewer->close(); // в деструкторе не работает
-
     // геометрия сохраняется только в closeEvent
     config->mainWindowGeometry = saveGeometry();
     config->mainWindowState    = saveState();
 }
-
 #ifdef SETSTYLE
 void MainWindow::setStyle()
 {

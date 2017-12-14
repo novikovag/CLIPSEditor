@@ -18,11 +18,11 @@
 
 #include "codeeditor.h"
 
-CodeEditor::CodeEditor(Config* config)
+CodeEditor::CodeEditor(Config *config)
     : config(config)
 {
     // для упорядочивания в QListWidget
-    qRegisterMetaTypeStreamOperators<CodeEditor::Bookmark*>("CodeEditor::Bookmark*");
+    qRegisterMetaTypeStreamOperators<CodeEditor::Bookmark *>("CodeEditor::Bookmark*");
 
     highlighter = new Highlighter(config, this); // тормоз
 
@@ -63,15 +63,15 @@ CodeEditor::CodeEditor(Config* config)
     menu->addAction(tr("UPPERCASE"),      this, SLOT(toUpperCase()),    QKeySequence(Qt::CTRL + Qt::Key_U));
     menu->addAction(tr("lowercase"),      this, SLOT(toLowerCase()),    QKeySequence(Qt::CTRL + Qt::Key_L));
     // не допускаем проваливание на последнем свернутом блоке
-    connect(this,       SIGNAL(cursorPositionChanged()),       SLOT(ensureCursorVisible()));
-    connect(this,       SIGNAL(blockCountChanged(int)),        SLOT(blockCountChanged(int)));
-    connect(document(), SIGNAL(contentsChange(int, int, int)), SLOT(contentsChange(int, int, int)));
-    connect(completer,  SIGNAL(activated(const QString&)),     SLOT(insertCompletion(const QString&)));
-    connect(config,     SIGNAL(reread(int)),                   SLOT(reconfig(int)));
+    connect(this,       SIGNAL(cursorPositionChanged()),              SLOT(ensureCursorVisible()));
+    connect(this,       SIGNAL(blockCountChanged(int)),               SLOT(blockCountChanged(int)));
+    connect(document(), SIGNAL(contentsChange(int, int, int)),        SLOT(contentsChange(int, int, int)));
+    connect(completer,  SIGNAL(activated(const QString &)),           SLOT(insertCompletion(const QString &)));
+    connect(config,     SIGNAL(reread(int)),                          SLOT(reconfig(int)));
     connect(this,       SIGNAL(updateRequest(QRect, int)), extraArea, SLOT(update()));
 }
 
-void CodeEditor::resizeEvent(QResizeEvent* e)
+void CodeEditor::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
 
@@ -84,7 +84,7 @@ void CodeEditor::resizeEvent(QResizeEvent* e)
     extraArea->setGeometry(contentsRect().x(), contentsRect().y(), width, contentsRect().height());
 }
 
-void CodeEditor::paintEvent(QPaintEvent* e)
+void CodeEditor::paintEvent(QPaintEvent *e)
 {
     QPlainTextEdit::paintEvent(e);
 
@@ -134,14 +134,13 @@ void CodeEditor::paintEvent(QPaintEvent* e)
 
     } while ((block = block.next()).isValid() && rect.y() < viewport()->height());
 
-
     if (config->verticalEdge) {
         painter.setPen(Qt::gray);
         painter.drawLine(FONTWIDTH * config->verticalEdge, 0, FONTWIDTH * config->verticalEdge, viewport()->height());
     }
 }
 
-void CodeEditor::keyPressEvent(QKeyEvent* e)
+void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
     if (e->modifiers() == Qt::CTRL) {
         if (e->key() == Qt::Key_U)
@@ -156,7 +155,7 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
             foldAll();
         else if (e->key() == Qt::Key_Minus)
             unfoldAll();
-        else if (e->key() == Qt::Key_E) { // текущий блок
+        else if (e->key() == Qt::Key_E) {            // текущий блок
             QTextBlock block = textCursor().block(); // const
             foldUnfold(block);
             FULLRESIZE;
@@ -164,16 +163,12 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
 
         return;
     }
-
  SKIP: // продолжить обработку
     if (e->key() == Qt::Key_Backspace && config->backUnindent) {
         QTextCursor cursor = textCursor();
 
-        if (!cursor.hasSelection() && !cursor.atBlockStart() && cursor.block().text().
-                left(cursor.positionInBlock()).
-                trimmed().isEmpty()) {
-            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor,
-                                qMin(config->indentSize, cursor.positionInBlock()));
+        if (!cursor.hasSelection() && !cursor.atBlockStart() && cursor.block().text().left(cursor.positionInBlock()).trimmed().isEmpty()) {
+            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, qMin(config->indentSize, cursor.positionInBlock()));
             cursor.removeSelectedText();
             return;
         }
@@ -188,7 +183,6 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
             int end = document()->findBlock(cursor.selectionEnd()).blockNumber();
 
             if (end - block.blockNumber()) {
-
                 cursor.beginEditBlock();
 
                 do {
@@ -197,7 +191,6 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
                 } while ((block = block.next()).isValid() && block.blockNumber() <= end);
 
                 cursor.endEditBlock();
-
                 return;
             }
 
@@ -248,7 +241,7 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void CodeEditor::mouseMoveEvent(QMouseEvent* e)
+void CodeEditor::mouseMoveEvent(QMouseEvent *e)
 {
     QTextBlock block = findBlockByY(e->pos().y());
 
@@ -272,7 +265,6 @@ void CodeEditor::mouseMoveEvent(QMouseEvent* e)
         QString str;
 
         while ((block = block.next()).isValid() && !block.isVisible()) {
-
             if (str.count() > 1)
                 str += "\n";
 
@@ -293,20 +285,21 @@ void CodeEditor::mouseMoveEvent(QMouseEvent* e)
     QPlainTextEdit::mouseMoveEvent(e);
 }
 
-void CodeEditor::mousePressEvent(QMouseEvent* e)
+void CodeEditor::mousePressEvent(QMouseEvent *e)
 {
     if (pointedBlock.isValid()) {
         foldUnfold(pointedBlock);
         pointedBlock = QTextBlock();
         viewport()->setCursor(Qt::IBeamCursor);
         FULLRESIZE;
-    } else
+    } else {
         QPlainTextEdit::mousePressEvent(e);
+    }
 }
 
-void CodeEditor::contextMenuEvent(QContextMenuEvent* e)
+void CodeEditor::contextMenuEvent(QContextMenuEvent *e)
 {
-    QList<QAction*> acts = menu->actions();
+    QList<QAction *> acts = menu->actions();
 
     acts[0]->setEnabled(document()->isUndoAvailable());
     acts[1]->setEnabled(document()->isRedoAvailable());
@@ -320,15 +313,15 @@ void CodeEditor::contextMenuEvent(QContextMenuEvent* e)
     menu->exec(e->globalPos());
 }
 
-bool CodeEditor::eventFilter(QObject* obj, QEvent* e)
+bool CodeEditor::eventFilter(QObject *obj, QEvent *e)
 {
     if (obj == extraArea) {
         if (e->type() == QEvent::Paint)
             extraAreaPaintEvent();
-        else if (e->type() == QEvent::MouseButtonPress ||
-                 e->type() == QEvent::MouseButtonDblClick)
-            extraAreaMouseEvent(static_cast<QMouseEvent*>(e));
-        else return false;
+        else if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseButtonDblClick)
+            extraAreaMouseEvent(static_cast<QMouseEvent *>(e));
+        else
+            return false;
 
         return true;
     }
@@ -346,7 +339,7 @@ void CodeEditor::extraAreaPaintEvent()
     bool 	 bold = font.bold();
 
     int y  = 0;
-    int cx = markWidth + lineNumWidth + foldBoxIndent + foldBoxWidth / 2;  // центр маркера блока по x
+    int cx = markWidth + lineNumWidth + foldBoxIndent + foldBoxWidth / 2; // центр маркера блока по x
 
     do {
         if (!block.isVisible())
@@ -359,8 +352,9 @@ void CodeEditor::extraAreaPaintEvent()
         if (block == textCursor().block()) {
             painter.setPen(Qt::yellow);
             font.setBold(!bold);
-        } else
+        } else {
             font.setBold(bold);
+        }
 
         painter.setFont(font);
         painter.drawText(markWidth, y, lineNumWidth, fontMetrics().height(), Qt::AlignRight,
@@ -408,7 +402,7 @@ void CodeEditor::extraAreaPaintEvent()
     } while ((block = block.next()).isValid() && y < viewport()->height());
 }
 
-void CodeEditor::extraAreaMouseEvent(QMouseEvent* e)
+void CodeEditor::extraAreaMouseEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton) {
         QTextBlock block = findBlockByY(e->pos().y());
@@ -416,20 +410,20 @@ void CodeEditor::extraAreaMouseEvent(QMouseEvent* e)
         if (e->pos().x() <= markWidth) {
             if (block.userData() != 0)
                 BLOCKMARK->setActive(!BLOCKMARK->isActive);
-            else block.setUserData(reinterpret_cast<QTextBlockUserData*>(new Bookmark(this, block)));
+            else
+                block.setUserData(reinterpret_cast<QTextBlockUserData *>(new Bookmark(this, block)));
 
             extraArea->update();
-
         } else if (FOLDBOXRECT(blockBoundingGeometry(block).translated(contentOffset()).y() +
                                fontMetrics().height() / 2).contains(e->pos())) {
-                foldUnfold(block);
-                ensureCursorVisible();
-                FULLRESIZE;
+            foldUnfold(block);
+            ensureCursorVisible();
+            FULLRESIZE;
         }
     }
 }
 
-int CodeEditor::setBlockState(QTextBlock& block)
+int CodeEditor::setBlockState(QTextBlock &block)
 {
     int previousBlockState = block.previous().userState();
 
@@ -450,15 +444,13 @@ int CodeEditor::setBlockState(QTextBlock& block)
     while (txt[i].isSpace()) ++i;
 
     if (txt[i] == ';') {
-
         if (!previousBraceDepth || previousBlockState & Comment) {
             state |= Comment; // только за предалами блока кода
 
             if (previousBlockState & Comment) {
-
-                if (braceDepth)
+                if (braceDepth) {
                     braceDepth--;
-                else {
+                } else {
                     previousBraceDepth = 1;
 
                     previousBlockState = (previousBlockState & End ? Nested : Begin) |
@@ -495,11 +487,9 @@ int CodeEditor::setBlockState(QTextBlock& block)
             state |= Error;
         } else {
             while (i < txt.length()) {
-
                 if (txt[i] == '"' && !(i && txt[i - 1] == '\\'))
                     inString = !inString;
                 else if (!inString) {
-
                     if (txt[i] == ';') // комментарий в блоке кода
                         break;
 
@@ -522,7 +512,6 @@ int CodeEditor::setBlockState(QTextBlock& block)
     }
 
     if (!(state & (Error | Comment))) {
-
         if (inString)
             state |= String;
 
@@ -574,7 +563,6 @@ int CodeEditor::setBlockState(QTextBlock& block)
 void CodeEditor::contentsChange(int pos, int a, int b)
 {
     QTextBlock block = textCursor().block();
-
     // сдвиг блока клавишей Return
     // состояние предыдущего блока может быть неверным
     if (block.userState() == Empty)
@@ -588,7 +576,7 @@ void CodeEditor::contentsChange(int pos, int a, int b)
 
     while (block.isValid()) {
         if (block.userData() != 0)
-            reinterpret_cast<Bookmark*>(block.userData())->check();
+            reinterpret_cast<Bookmark *>(block.userData())->check();
 
         int previousState = block.userState();
         int state = setBlockState(block);
@@ -601,14 +589,12 @@ void CodeEditor::contentsChange(int pos, int a, int b)
             int nextBlockState = next.userState();
             setBlockState(next);
             next.setUserState(nextBlockState); // в начальное состояние
-
             // правильное состояние комментария известно
             // только после обработки последующей строки
             state = block.userState();
         }
 
         if (state != previousState) {
-
             if (!forceUnfold) { // разворачиваем предыдущие блоки
                 QTextBlock previous = block.previous();
 
@@ -645,7 +631,7 @@ void CodeEditor::contentsChange(int pos, int a, int b)
     }
 }
 
-void CodeEditor::foldUnfold(QTextBlock& block)
+void CodeEditor::foldUnfold(QTextBlock &block)
 {
     int state = block.userState();
 
@@ -670,18 +656,15 @@ void CodeEditor::foldUnfold(QTextBlock& block)
         int state = block.userState();
         braceDepth = state >> StateShift;
 
-        if (unfolding) {
-
-            if (state & Begin && !skipDepth && state & Folded)
+        if (unfolding)
+            if (state & Begin && !skipDepth && state & Folded) {
                 skipDepth = block.previous().userState() >> StateShift;
-            else if (skipDepth) {
-
+            } else if (skipDepth) {
                 if (braceDepth == skipDepth)
                     skipDepth = 0;
 
                 continue;
             }
-        }
 
         block.setVisible(unfolding);
 
@@ -702,7 +685,6 @@ void CodeEditor::foldUnfoldAll(bool folding)
             continue;
 
         foldUnfold(block);
-
     } while ((block = block.next()).isValid());
 
     ensureCursorVisible();
@@ -714,7 +696,6 @@ void CodeEditor::performCompletion()
     QString txt = textCursor().block().text();
 
     int i = textCursor().positionInBlock();
-
     // слова включают символ '-' (завершающиe '*', '$' не учитываем)
     // обходимся без QTextCursor::WordUnderCursor
     while (--i >= 0 && (QChar(txt[i]).isLetter() || txt[i] == '-'));
@@ -762,9 +743,7 @@ void CodeEditor::toggleComment()
 
     cursor.beginEditBlock();
 
-    for (int i = document()->findBlock(cursor.selectionStart()).blockNumber();
-             i <= end; i++) {
-
+    for (int i = document()->findBlock(cursor.selectionStart()).blockNumber(); i <= end; i++) {
         QTextBlock block = document()->findBlockByNumber(i);
 
         cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
@@ -816,10 +795,8 @@ bool CodeEditor::search(QString str, int flags)
 {
     QTextCursor cursor = textCursor();
 
-    cursor = (flags & RegExp) ?
-             document()->find(QRegExp(str), cursor, static_cast<QTextDocument::FindFlag>(flags)) :
-             document()->find(str, cursor, static_cast<QTextDocument::FindFlag>(flags));
-
+    cursor = (flags & RegExp) ? document()->find(QRegExp(str), cursor, static_cast<QTextDocument::FindFlag>(flags)) :
+                                document()->find(str, cursor, static_cast<QTextDocument::FindFlag>(flags));
     if (cursor.isNull())
         return false;
 
@@ -875,12 +852,9 @@ void CodeEditor::reconfig(int receiver)
     font.setBold(fmt.font().bold());
     font.setItalic(fmt.font().italic());
     setFont(font);
-
     // при стилях, QPalette не работает,
     // также слетают стили QScrollBar у редактора
-    setStyleSheet(QString("color: %1; background-color: %2").
-                          arg(fmt.foreground().color().name()).
-                          arg(fmt.background().color().name()));
+    setStyleSheet(QString("color: %1; background-color: %2").arg(fmt.foreground().color().name()).arg(fmt.background().color().name()));
 
     fmt = config->colorScheme["Line Numbers"];
 
@@ -888,9 +862,7 @@ void CodeEditor::reconfig(int receiver)
     font.setItalic(fmt.font().italic());
     extraArea->setFont(font);
 
-    extraArea->setStyleSheet(QString("color: %1; background-color: %2").
-                                     arg(fmt.foreground().color().name()).
-                                     arg(fmt.background().color().name()));
+    extraArea->setStyleSheet(QString("color: %1; background-color: %2").arg(fmt.foreground().color().name()).arg(fmt.background().color().name()));
 
     foldBoxWidth  = config->fontSize;
     foldBoxIndent = foldBoxWidth / 2;
@@ -904,16 +876,15 @@ void CodeEditor::reconfig(int receiver)
 
     if (!(receiver & Config::Init)) {
         QTextBlock block = document()->firstBlock();
-
-        do { // receiver & Config::Highlighter
+        // receiver & Config::Highlighter
+        do {
             block.setUserState(block.userState() | Rehighlight);
         } while ((block = block.next()).isValid());
 
         FULLRESIZE;
     }
 }
-
 // для упорядочивания в QListWidget с Qt::UserRole, копирование данных не используется
-QDataStream& operator<<(QDataStream& out, const CodeEditor::Bookmark* obj) { return out; }
-QDataStream& operator>>(QDataStream& in, CodeEditor::Bookmark* obj) { return in; }
+QDataStream &operator<<(QDataStream &out, const CodeEditor::Bookmark *obj) { return out; }
+QDataStream &operator>>(QDataStream &in, CodeEditor::Bookmark *obj) { return in; }
 
