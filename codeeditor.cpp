@@ -1,6 +1,6 @@
 /*===========================================================================
     CLIPSEditor, editor for CLIPS (C Language Integrated Production System)
-    Copyright (C) 2012-2017 Novikov Artem Gennadievich
+    Copyright (C) 2012-2018 Artem G. Novikov
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -727,7 +727,7 @@ void CodeEditor::performCompletion()
    }
 }
 
-void CodeEditor::insertCompletion(const QString& txt)
+void CodeEditor::insertCompletion(const QString &txt)
 {
     QTextCursor cursor = textCursor();
 
@@ -884,6 +884,7 @@ void CodeEditor::reconfig(int receiver)
         FULLRESIZE;
     }
 }
+
 // для упорядочивания в QListWidget с Qt::UserRole, копирование данных не используется
 QDataStream &operator<<(QDataStream &out, const CodeEditor::Bookmark *obj) { return out; }
 QDataStream &operator>>(QDataStream &in, CodeEditor::Bookmark *obj) { return in; }

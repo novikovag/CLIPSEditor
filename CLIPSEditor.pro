@@ -45,32 +45,3 @@ FORMS += \
     snippets.ui \
     bookmarks.ui \
     helpviewer.ui
-
-
-#win32: {
-#    RC_ICONS += rc/icon.ico
-
-#    static {
-#        message("*** w32 static")
-
-#        DEFINES += W32STATIC
-#        QT -= help
-#        INCLUDEPATH += C:/Qt/Qt5.4.1/5.4/Src/qttools/include/ \
-#                       C:/X-Files/CLIPSEditor/build-qttools-Desktop_Qt_5_4_1_MinGW_32bit_Static-Release/include
-#        LIBS += -LC:/X-Files/CLIPSEditor/build-qttools-Desktop_Qt_5_4_1_MinGW_32bit_Static-Release/lib -lQt5Help
-
-#        upx {
-#            message("+++ upx")
-
-#            PWD_WIN = $${PWD}
-#            PWD_WIN ~= s,/,\\,g
-
-#            OUT_PWD_WIN = $${OUT_PWD}
-#            OUT_PWD_WIN ~= s,/,\\,g
-
-#            QMAKE_POST_LINK = $${PWD_WIN}\\misc\\upx\\upx.exe $${OUT_PWD_WIN}\\release\\$${TARGET}.exe
-#        }
-#    } else {
-#        QT += help
-#    }
-#}

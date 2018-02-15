@@ -1,6 +1,6 @@
 /*===========================================================================
     CLIPSEditor, editor for CLIPS (C Language Integrated Production System)
-    Copyright (C) 2012-2017 Novikov Artem Gennadievich
+    Copyright (C) 2012-2018 Artem G. Novikov
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ MainWindow::MainWindow(Config *config)
 #endif
     menu->addAction(tr("New"),              this, SLOT(newFile()),       QKeySequence::New);
     menu->addAction(tr("Open..."),          this, SLOT(openFile()),      QKeySequence::Open);
-    menuActs << menu->addAction(tr("Save"), this, SLOT(saveFile()),      QKeySequence::Save);
+    menuActs << menu->addAction(tr("Save"), this, SLOT(saveCurrentFile()),      QKeySequence::Save);
     menu->addAction(tr("Save As..."),       this, SLOT(saveFileAs()),    Qt::CTRL + Qt::ALT + Qt::Key_S);
     menu->addAction(tr("Save All"),         this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     menu->addAction(tr("Close All"),        this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
@@ -80,7 +80,6 @@ MainWindow::MainWindow(Config *config)
 
     setCentralWidget(tabWidget);
     setWindowTitle(PROGNAME);
-    setAcceptDrops(true);
 
     restoreGeometry(config->mainWindowGeometry);
     restoreState(config->mainWindowState);
@@ -94,7 +93,7 @@ MainWindow::MainWindow(Config *config)
             i = tabWidget->count() - 1;
 
         tabWidget->setCurrentIndex(i);
-        tabWidget->currentWidget()->setFocus();
+        CURRENT->setFocus();
     }
 
     currentChanged(i);
@@ -110,20 +109,39 @@ MainWindow::MainWindow(Config *config)
 
 void MainWindow::newFile()
 {
+    CodeEditor *codeEditor = new CodeEditor(config);
+
+    connect(codeEditor, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()),   Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(dropUrls(QList<QUrl>)),     SLOT(dropUrls(QList<QUrl>)), Qt::UniqueConnection);
+
+    connect(codeEditor, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)),       Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)), Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)),    Qt::UniqueConnection);
+
     QString name = tr("NEW %1").arg(++fileNum);
     //addTab(...) не устанавливает windowTitle
-    tabWidget->setCurrentIndex(tabWidget->addTab(new CodeEditor(config), name));
-    tabWidget->currentWidget()->setWindowTitle(name);
+    tabWidget->setCurrentIndex(tabWidget->addTab(codeEditor, name));
+    CURRENT->setWindowTitle(name);
 }
 
-void MainWindow::dropEvent(QDropEvent *e)
+void MainWindow::dropUrls(QList<QUrl> urls)
 {
     QStringList names;
 
-    for (int i = 0; i < e->mimeData()->urls().count(); i++)
-        names << e->mimeData()->urls()[i].toLocalFile();
+    for (int i = 0; i < urls.count(); i++) {
+        QString name = QDir::toNativeSeparators(urls[i].toLocalFile());
 
-    openFiles(names);
+        for (int j = 0; j < tabWidget->count(); j++)
+            if (tabWidget->widget(j)->windowFilePath() == name)
+               goto L;
+
+        names << name;
+    L:;
+    }
+
+    if (names.count())
+        openFiles(names);
 }
 
 void MainWindow::openFile(QString name)
@@ -139,7 +157,7 @@ void MainWindow::openFile(QString name)
 void MainWindow::openFiles(QStringList names)
 {
     foreach (QString name, names) {
-        if (!(tabWidget->count() == 1 && !EDITOR->document()->isModified() && tabWidget->currentWidget()->windowFilePath().isEmpty()))
+        if (!(tabWidget->count() == 1 && !EDITOR->document()->isModified() && CURRENT->windowFilePath().isEmpty()))
             newFile();
 
         loadFile(name);
@@ -155,30 +173,29 @@ void MainWindow::closeAllFiles()
             return;
     }
 
-    int i = tabWidget->count();
-
-    while (i-- > 0)
-        tabWidget->removeTab(i);
+    for (int i = 0; i < tabWidget->count(); i++)
+        tabWidget->widget(i)->deleteLater(); // вызывает деструктор Bookmark
+        // tabWidget->removeTab(i);
 }
 
-bool MainWindow::saveFile()
+bool MainWindow::saveCurrentFile()
 {
-    QString fileName = tabWidget->currentWidget()->windowFilePath();
+    QString name = CURRENT->windowFilePath();
 
-    if (fileName.isEmpty())
+    if (name.isEmpty())
         return saveFileAs();
 
-    return saveFile(fileName);
+    return saveCurrentFile(name);
 }
 
 bool MainWindow::saveFileAs()
 {
-    QString name = QFileDialog::getSaveFileName(this, "", currentPath() + "/" + QFileInfo(tabWidget->currentWidget()->windowFilePath()).fileName(),
+    QString name = QFileDialog::getSaveFileName(this, "", currentPath() + "/" + QFileInfo(CURRENT->windowFilePath()).fileName(),
                                                 tr("CLIPS files (*.clp *.bat);;All types (*)"));
     if (name.isEmpty())
         return false;
 
-    return saveFile(name);
+    return saveCurrentFile(name);
 }
 
 void MainWindow::saveAllFiles()
@@ -187,7 +204,7 @@ void MainWindow::saveAllFiles()
 
     for (int i = 0; i < tabWidget->count(); i++) {
         tabWidget->setCurrentIndex(i);
-        saveFile();
+        saveCurrentFile();
     }
 
     tabWidget->setCurrentIndex(c);
@@ -232,13 +249,13 @@ void MainWindow::help()
 }
 
 
-void MainWindow::tabContextMenu(const QPoint& point)
+void MainWindow::tabContextMenu(const QPoint &point)
 {
     int i = tabWidget->tabBar()->tabAt(point);
     // иначе отработка также на extraArea
     if (tabWidget->tabBar()->tabRect(i).contains(point)) {
         tabWidget->setCurrentIndex(i);
-        closeFile();
+        closeCurrentFile();
     }
 }
 
@@ -280,13 +297,15 @@ void MainWindow::currentChanged(int i)
 
     menuActs[0]->setEnabled(EDITOR->document()->isModified()); // saveAct
     cursorPositionChanged();
-
+/*
     connect(EDITOR, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
     connect(EDITOR, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()),   Qt::UniqueConnection);
+    connect(EDITOR, SIGNAL(dropUrls(QList<QUrl>)),     SLOT(dropUrls(QList<QUrl>)), Qt::UniqueConnection);
 
     connect(EDITOR, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)),       Qt::UniqueConnection);
     connect(EDITOR, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)), Qt::UniqueConnection);
     connect(EDITOR, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)),    Qt::UniqueConnection);
+*/
 }
 
 void MainWindow::updateRecentFiles()
@@ -317,22 +336,23 @@ bool MainWindow::maybeSave()
         QMessageBox::StandardButton ret = QMessageBox::warning(this, tr(PROGNAME), tr("Do you want to save your changes?"),
                                                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if (ret == QMessageBox::Save)
-            return saveFile();
-        else if (ret == QMessageBox::Cancel)
+            return saveCurrentFile();
+        
+        if (ret == QMessageBox::Cancel)
             return false;
     }
 
     return true;
 }
 
-void MainWindow::setCurrentFile(QString& name)
+void MainWindow::setCurrentFile(QString &name)
 {
     name = QDir::toNativeSeparators(name);
 
     tabWidget->setTabText(tabWidget->currentIndex(), QFileInfo(name).fileName());
     tabWidget->setTabToolTip(tabWidget->currentIndex(), name);   
-    tabWidget->currentWidget()->setWindowFilePath(name); // "" для новых файлов
-    tabWidget->currentWidget()->setWindowTitle(QFileInfo(name).fileName());
+    CURRENT->setWindowFilePath(name); // "" для новых файлов
+    CURRENT->setWindowTitle(QFileInfo(name).fileName());
 
     config->recentFiles.removeAll(name);
     config->recentFiles.prepend(name);
@@ -343,7 +363,7 @@ void MainWindow::setCurrentFile(QString& name)
     lastPath = QFileInfo(name).path();
 }
 
-void MainWindow::loadFile(QString& name)
+void MainWindow::loadFile(QString &name)
 {
     QStringList names = name.split('#');
     // нет позиции, например загрузка из сессии
@@ -374,7 +394,7 @@ void MainWindow::loadFile(QString& name)
     }
 }
 
-bool MainWindow::saveFile(QString& name)
+bool MainWindow::saveCurrentFile(QString &name)
 {
     QFile file(name);
 
@@ -401,8 +421,8 @@ bool MainWindow::saveFile(QString& name)
 
 QString MainWindow::currentPath()
 {
-    if (!tabWidget->currentWidget()->windowFilePath().isEmpty() && QDir(QFileInfo(tabWidget->currentWidget()->windowFilePath()).path()).exists())
-        return QFileInfo(tabWidget->currentWidget()->windowFilePath()).path();
+    if (!CURRENT->windowFilePath().isEmpty() && QDir(QFileInfo(CURRENT->windowFilePath()).path()).exists())
+        return QFileInfo(CURRENT->windowFilePath()).path();
 
     if (!lastPath.isEmpty() && QDir(lastPath).exists())
         return lastPath;

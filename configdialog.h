@@ -1,6 +1,6 @@
 /*===========================================================================
     CLIPSEditor, editor for CLIPS (C Language Integrated Production System)
-    Copyright (C) 2012-2017 Novikov Artem Gennadievich
+    Copyright (C) 2012-2018 Artem G. Novikov
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

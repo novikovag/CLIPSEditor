@@ -1,6 +1,6 @@
 /*===========================================================================
     CLIPSEditor, editor for CLIPS (C Language Integrated Production System)
-    Copyright (C) 2012-2017 Novikov Artem Gennadievich
+    Copyright (C) 2012-2018 Artem G. Novikov
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@ signals:
     void addBookmark(CodeEditor::Bookmark *);
     void moveBookmark(CodeEditor::Bookmark *, int);
     void removeBookmark(CodeEditor::Bookmark *);
+    void dropUrls(QList<QUrl>);
 
 private slots:
     void foldAll()        { foldUnfoldAll(); }
@@ -125,7 +126,7 @@ private slots:
     void blockCountChanged(int count) { lineNumDigits = qMax(2, QString::number(count).length()); } // 2 - разряда
     void contentsChange(int, int, int);
     void performCompletion();
-    void insertCompletion(const QString&);
+    void insertCompletion(const QString &);
     void ensureCursorVisible();
 
     void reconfig(int = (Config::Init | Config::Editor));
@@ -151,12 +152,12 @@ private:
 
     void convertCase(bool toUpper = true) { textCursor().insertText(toUpper ? textCursor().selectedText().toUpper() : textCursor().selectedText().toLower()); }
 
-    Highlighter* highlighter;
-    QCompleter*  completer;
+    Highlighter *highlighter;
+    QCompleter  *completer;
 
     QTextBlock   pointedBlock;
 
-    QWidget*     extraArea;
+    QWidget     *extraArea;
 
     int          lineNumDigits;
     int          lineNumWidth;
@@ -167,13 +168,21 @@ private:
 
     int          markWidth; // от размера шрифта
 
-    Config*      config;
+    Config      *config;
 
-    QMenu*       menu;
+    QMenu       *menu;
 
     QImage       mark;
 
     QList<QKeySequence> shortcuts;
+
+    void dropEvent(QDropEvent *e)
+    {
+        if (e->mimeData()->hasUrls())
+            emit dropUrls(e->mimeData()->urls());
+        else
+            QPlainTextEdit::dropEvent(e);
+    }
 };
 // конвертация в QVariant
 Q_DECLARE_METATYPE(CodeEditor::Bookmark *)

@@ -1,6 +1,6 @@
 /*===========================================================================
     CLIPSEditor, editor for CLIPS (C Language Integrated Production System)
-    Copyright (C) 2012-2017 Novikov Artem Gennadievich
+    Copyright (C) 2012-2018 Artem G. Novikov
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ Bookmarks::Bookmarks(QTabWidget *tabWidget)
     menu->addAction(tr("Rename"), this, SLOT(rename())); // QKeySequence::?
     menu->addAction(tr("Remove"), this, SLOT(remove()));
 
-    // флаги перетаскивание установленны в форме
+    // флаги перетаскивания установлены в форме
     // setDropIndicatorShown(true)
     // setDefaultDropAction(Qt::TargetMoveAction)
     // setDragDropMode(QAbstractItemView::InternalMove)
@@ -39,8 +39,9 @@ Bookmarks::Bookmarks(QTabWidget *tabWidget)
 
 void Bookmarks::addBookmark(CodeEditor::Bookmark *mark)
 {
-    QListWidgetItem *item = new QListWidgetItem(QString("%1: %2 %3").arg(mark->block.blockNumber() + 1).arg(tabWidget->currentWidget()->windowTitle().remove("[*]")).
-                                                        arg(mark->block.text()), lstBookmarks);
+    QListWidgetItem *item = new QListWidgetItem(QString("%1: %2 %3").arg(mark->block.blockNumber() + 1).
+                                                                     arg(tabWidget->currentWidget()->windowTitle().remove("[*]")).
+                                                                     arg(mark->block.text()), lstBookmarks);
     item->setData(Qt::UserRole, QVariant::fromValue(mark));
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     map[mark] = item;
