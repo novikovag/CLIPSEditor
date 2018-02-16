@@ -47,6 +47,18 @@ ConfigDialog::ConfigDialog(Config *config)
         item->setForeground(it.value().foreground());
         item->setBackground(it.value().background());
         item->setFont(it.value().font());
+
+        QStringList values = config->keywords.keywords.values(it.key());
+        values.sort();
+
+        QString tooltip;
+
+        for (int i = 0; i < values.size(); i++)
+            tooltip += values.at(i) + "\n";
+        // убираем самый последний NL
+        tooltip.chop(1);
+
+        item->setToolTip(tooltip);
     }
 
     lstScheme->setCurrentRow(0);
@@ -86,13 +98,13 @@ void ConfigDialog::applay()
 
     for (int i = 0; i < lstScheme->count(); i++) {
         QListWidgetItem *item = lstScheme->item(i);
-        QTextCharFormat  fmt;
+        QTextCharFormat  format;
 
-        fmt.setForeground(item->foreground());
-        fmt.setBackground(item->background());
-        fmt.setFontItalic(item->font().italic());
-        fmt.setFontWeight(item->font().weight());
-        config->colorScheme[item->text()] = fmt;
+        format.setForeground(item->foreground());
+        format.setBackground(item->background());
+        format.setFontItalic(item->font().italic());
+        format.setFontWeight(item->font().weight());
+        config->colorScheme[item->text()] = format;
     }
 
     config->reconfig(Config::Editor);
