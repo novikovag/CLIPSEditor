@@ -299,8 +299,6 @@ void CodeEditor::mousePressEvent(QMouseEvent *e)
 
 void CodeEditor::contextMenuEvent(QContextMenuEvent *e)
 {
-    QList<QAction *> acts = menu->actions();
-
     MUNDO->setEnabled(document()->isUndoAvailable());
     MREDO->setEnabled(document()->isRedoAvailable());
     MCUT->setEnabled(textCursor().hasSelection());
