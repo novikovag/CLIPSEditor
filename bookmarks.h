@@ -25,8 +25,6 @@
 
 #include "codeeditor.h"
 
-#define DATAMARK item->data(Qt::UserRole).value<CodeEditor::Bookmark*>()
-
 class Bookmarks : public QWidget, private Ui::Bookmarks
 {
     Q_OBJECT
@@ -40,30 +38,16 @@ signals:
 public slots:
     void addBookmark(CodeEditor::Bookmark *);
 
-    void moveBookmark(CodeEditor::Bookmark*  mark, int)
-    {
-        // при переименование может теряться маркер '^\\d+'
-        map[mark]->setText(map[mark]->text().replace(QRegExp("^\\d+:"), QString("%1:").arg(mark->block.blockNumber() + 1)));
-    }
+    void moveBookmark(CodeEditor::Bookmark*  mark, int) { map[mark]->setText(QString("%1:").arg(mark->block.blockNumber() + 1)); }
 
+    void removeBookmark();
     void removeBookmark(CodeEditor::Bookmark *);
 
-    void clicked(QListWidgetItem *);
-
-    void clicked(const QPoint &point)
-    {
-        if (lstBookmarks->itemAt(point))
-            menu->exec(mapToGlobal(point));
-    }
-
-    void rename() { lstBookmarks->editItem(lstBookmarks->currentItem()); }
-
-    void remove() { lstBookmarks->currentItem()->data(Qt::UserRole).value<CodeEditor::Bookmark*>()->setActive(false); }
-
+    void contextMenu(const QPoint &);
 private:
     QMenu      *menu;
     QTabWidget *tabWidget;
-    QMap<CodeEditor::Bookmark *, QListWidgetItem *> map;
+    QMap<CodeEditor::Bookmark *, QTableWidgetItem *> map;
 };
 
 #endif // BOOKMARKS_H

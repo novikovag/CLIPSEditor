@@ -24,46 +24,57 @@ Bookmarks::Bookmarks(QTabWidget *tabWidget)
     setupUi(this);
 
     menu = new QMenu();
-    menu->addAction(tr("Rename"), this, SLOT(rename())); // QKeySequence::?
-    menu->addAction(tr("Remove"), this, SLOT(remove()));
+    menu->addAction(tr("Remove"), this, SLOT(removeBookmark()));
 
-    // флаги перетаскивания установлены в форме
-    // setDropIndicatorShown(true)
-    // setDefaultDropAction(Qt::TargetMoveAction)
-    // setDragDropMode(QAbstractItemView::InternalMove)
+    QStringList labels;
+    labels << tr("File") << tr("Line") << tr("Comment");
 
-    connect(lstBookmarks, SIGNAL(itemDoubleClicked(QListWidgetItem *)),       SLOT(clicked(QListWidgetItem *)));
-    // если установлен флаг setContextMenuPolicy(Qt::CustomContextMenu)
-    connect(lstBookmarks, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(clicked(const QPoint &)));
+    tblBookmarks->setHorizontalHeaderLabels(labels);
+    tblBookmarks->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    connect(tblBookmarks, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(contextMenu(const QPoint &)));
 }
 
 void Bookmarks::addBookmark(CodeEditor::Bookmark *mark)
 {
-    QListWidgetItem *item = new QListWidgetItem(QString("%1: %2 %3").arg(mark->block.blockNumber() + 1).
-                                                                     arg(tabWidget->currentWidget()->windowTitle().remove("[*]")).
-                                                                     arg(mark->block.text()), lstBookmarks);
+    tblBookmarks->insertRow(tblBookmarks->rowCount());
+
+    QTableWidgetItem *item = new QTableWidgetItem(tabWidget->currentWidget()->windowTitle().remove("[*]"));
+    item->setFlags(0);
+    tblBookmarks->setItem(tblBookmarks->rowCount() - 1, 0, item);
+
+    item = new QTableWidgetItem(QString("%1").arg(mark->block.blockNumber() + 1));
+    item->setFlags(0);
     item->setData(Qt::UserRole, QVariant::fromValue(mark));
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    // сохраняем только элемент изменяемого номера строки
     map[mark] = item;
+    tblBookmarks->setItem(tblBookmarks->rowCount() - 1, 1, item);
+
+    item = new QTableWidgetItem(mark->block.text());
+    tblBookmarks->setItem(tblBookmarks->rowCount() - 1, 2, item);
+}
+
+void Bookmarks::removeBookmark() {
+    int i = tblBookmarks->selectedRanges().at(0).topRow();
+
+    tblBookmarks->item(i, 1)->data(Qt::UserRole).value<CodeEditor::Bookmark*>()->setActive(false);
 }
 
 void Bookmarks::removeBookmark(CodeEditor::Bookmark *mark)
 {
-   delete map[mark];
+   tblBookmarks->removeRow(tblBookmarks->row(map[mark]));
    map.remove(mark);
 }
 
-void Bookmarks::clicked(QListWidgetItem *item)
+void Bookmarks::contextMenu(const QPoint &point)
 {
-    for (int i = 0; i < tabWidget->count(); i++) {
-        if (tabWidget->widget(i) == DATAMARK->editor) {
-            tabWidget->setCurrentIndex(i);
+    int i = tblBookmarks->rowAt(point.y());
 
-            QTextCursor cursor = DATAMARK->editor->textCursor();
-            cursor.setPosition(DATAMARK->block.position());
-            DATAMARK->editor->setTextCursor(cursor);
-            DATAMARK->editor->centerCursor();
-            break;
-        }
+    if (i != -1) {
+        tblBookmarks->selectRow(i);
+        menu->exec(tblBookmarks->mapToGlobal(point));
     }
 }
+
+
+

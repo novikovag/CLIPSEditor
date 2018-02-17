@@ -307,18 +307,6 @@ void MainWindow::help()
     helpViewer->activateWindow();
 }
 
-/*
-void MainWindow::tabContextMenu(const QPoint &point)
-{
-    int i = tabWidget->tabBar()->tabAt(point);
-    // иначе отработка также на extraArea
-    if (tabWidget->tabBar()->tabRect(i).contains(point)) {
-        tabWidget->setCurrentIndex(i);
-        closeCurrentFile();
-    }
-}
-*/
-
 void MainWindow::tabContextMenu(const QPoint &point)
 {
     int i = tabWidget->tabBar()->tabAt(point);
