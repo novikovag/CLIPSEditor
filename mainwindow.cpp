@@ -37,15 +37,15 @@ MainWindow::MainWindow(Config *config)
     status = new QLabel();
     status->setIndent(50);
     statusBar()->addWidget(status, 1);
-
-    QMenu *menu = menuBar()->addMenu(tr("&File"));
-    connect(menu, SIGNAL(aboutToShow()), this, SLOT(updateRecentFiles()));
-#ifdef SETSTYLE
-    menu->addAction(tr("#Set Style..."),    this, SLOT(setStyle()));
-#endif
-    menu->addAction(tr("New"),              this, SLOT(newFile()),       QKeySequence::New);
-    menu->addAction(tr("Open..."),          this, SLOT(openFile()),      QKeySequence::Open);
-    menuActs << menu->addAction(tr("Save"), this, SLOT(saveCurrentFile()),      QKeySequence::Save);
+    // индексы "Save"[2] и Separator[18] определены дефайнами
+    fileMenu    = menuBar()->addMenu(tr("&File"));
+    QMenu *menu = fileMenu;
+    connect(menu, SIGNAL(aboutToShow()),    this, SLOT(updateRecentFiles()));
+    menu->addAction(tr("New"),              this, SLOT(newFile()),         QKeySequence::New);
+    menu->addAction(tr("Open..."),          this, SLOT(openFile()),        QKeySequence::Open);
+    // [2]
+    menu->addAction(tr("Save"),             this, SLOT(saveFile()), QKeySequence::Save);
+    menu->addAction(tr("Close"),            this, SLOT(closeFile()), QKeySequence::Close);
     menu->addAction(tr("Save As..."),       this, SLOT(saveFileAs()),    Qt::CTRL + Qt::ALT + Qt::Key_S);
     menu->addAction(tr("Save All"),         this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     menu->addAction(tr("Close All"),        this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
@@ -60,8 +60,8 @@ MainWindow::MainWindow(Config *config)
     action = menu->addAction(tr("Search && Replace"),  this, SLOT(showDock()), QKeySequence::Find);
     addDock(searchBar, action, tr("Search & Replace"), Qt::BottomDockWidgetArea, Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
     menu->addSeparator();
-
-    menuActs << menu->addSeparator();
+    // [18]
+    menu->addSeparator();
 
     for (int i = 0; i < config->maxRecentFiles; i++) {
         QAction *action = menu->addAction("", this, SLOT(openRecentFile()));
@@ -77,6 +77,18 @@ MainWindow::MainWindow(Config *config)
     menu->addAction(tr("CLIPS Help"),     this, SLOT(help()),  QKeySequence::HelpContents);
     menu->addSeparator();
     menu->addAction(tr("About..."),       this, SLOT(about()));
+#ifdef SETSTYLE
+    menu->addAction(tr("#Set Style..."),    this, SLOT(setStyle()));
+#endif
+    // все индексы кроме "Close" и "Save As..." определены дефайнами
+    tabMenu = new QMenu(this);
+    tabMenu->addAction(tr("Close"),                  this, SLOT(closeFile()));
+    tabMenu->addAction(tr("Close All BUT This"),     this, SLOT(closeOtherFiles()));
+    tabMenu->addAction(tr("Close All to the Left"),  this, SLOT(closeLeftFiles()));
+    tabMenu->addAction(tr("Close All to the Right"), this, SLOT(closeRightFiles()));
+    tabMenu->addAction(tr("Save"),                   this, SLOT(saveFile()));
+    tabMenu->addAction(tr("Save As..."),             this, SLOT(saveFileAs()));
+    tabMenu->addAction(tr("Rename"),                 this, SLOT(renameFile()));
 
     setCentralWidget(tabWidget);
     setWindowTitle(PROGNAME);
@@ -125,6 +137,44 @@ void MainWindow::newFile()
     CURRENT->setWindowTitle(name);
 }
 
+void MainWindow::openFile(QString name)
+{
+    QStringList names(name);
+
+    if (name.isEmpty())
+        names = QFileDialog::getOpenFileNames(this, "", currentPath(), tr("CLIPS files (*.clp *.bat);;All types (*)"));
+
+    openFiles(names);
+}
+
+bool MainWindow::saveFile()
+{
+    QString name = CURRENT->windowFilePath();
+
+    if (name.isEmpty())
+        return saveFileAs();
+
+    return saveFile(name);
+}
+
+bool MainWindow::saveFileAs()
+{
+    QString name = QFileDialog::getSaveFileName(this, "", currentPath() + "/" + QFileInfo(CURRENT->windowFilePath()).fileName(),
+                                                tr("CLIPS files (*.clp *.bat);;All types (*)"));
+    if (name.isEmpty())
+        return false;
+
+    return saveFile(name);
+}
+
+void MainWindow::renameFile()
+{
+    QString name = CURRENT->windowFilePath();
+
+    if (saveFileAs())
+        QFile::remove(name);
+}
+
 void MainWindow::dropUrls(QList<QUrl> urls)
 {
     QStringList names;
@@ -144,16 +194,6 @@ void MainWindow::dropUrls(QList<QUrl> urls)
         openFiles(names);
 }
 
-void MainWindow::openFile(QString name)
-{
-    QStringList names(name);
-
-    if (name.isEmpty())
-        names = QFileDialog::getOpenFileNames(this, "", currentPath(), tr("CLIPS files (*.clp *.bat);;All types (*)"));
-
-    openFiles(names);
-}
-
 void MainWindow::openFiles(QStringList names)
 {
     foreach (QString name, names) {
@@ -162,6 +202,18 @@ void MainWindow::openFiles(QStringList names)
 
         loadFile(name);
     }
+}
+
+void MainWindow::saveAllFiles()
+{
+    int c = tabWidget->currentIndex();
+
+    for (int i = 0; i < tabWidget->count(); i++) {
+        tabWidget->setCurrentIndex(i);
+        saveFile();
+    }
+
+    tabWidget->setCurrentIndex(c);
 }
 
 void MainWindow::closeAllFiles()
@@ -178,36 +230,43 @@ void MainWindow::closeAllFiles()
         // tabWidget->removeTab(i);
 }
 
-bool MainWindow::saveCurrentFile()
+void MainWindow::closeLeftFiles()
 {
-    QString name = CURRENT->windowFilePath();
+    QWidget *tab = tabWidget->currentWidget();
 
-    if (name.isEmpty())
-        return saveFileAs();
+    int i = 0;
 
-    return saveCurrentFile(name);
-}
-
-bool MainWindow::saveFileAs()
-{
-    QString name = QFileDialog::getSaveFileName(this, "", currentPath() + "/" + QFileInfo(CURRENT->windowFilePath()).fileName(),
-                                                tr("CLIPS files (*.clp *.bat);;All types (*)"));
-    if (name.isEmpty())
-        return false;
-
-    return saveCurrentFile(name);
-}
-
-void MainWindow::saveAllFiles()
-{
-    int c = tabWidget->currentIndex();
-
-    for (int i = 0; i < tabWidget->count(); i++) {
+    while (1) {
         tabWidget->setCurrentIndex(i);
-        saveCurrentFile();
+
+        if (tabWidget->currentWidget() == tab)
+            break;
+
+        if (maybeSave())
+            tabWidget->widget(i)->deleteLater();
+
+        i++;
+    }
+}
+
+void MainWindow::closeRightFiles()
+{
+    int index = tabWidget->currentIndex();
+
+    for (int i = index + 1; i < tabWidget->count(); i++) {
+        tabWidget->setCurrentIndex(i);
+
+        if (maybeSave())
+            tabWidget->widget(i)->deleteLater();
     }
 
-    tabWidget->setCurrentIndex(c);
+    tabWidget->setCurrentIndex(index);
+}
+
+void MainWindow::closeOtherFiles()
+{
+    closeLeftFiles();
+    closeRightFiles();
 }
 
 void MainWindow::loadSession(QStringList names, bool open)
@@ -248,7 +307,7 @@ void MainWindow::help()
     helpViewer->activateWindow();
 }
 
-
+/*
 void MainWindow::tabContextMenu(const QPoint &point)
 {
     int i = tabWidget->tabBar()->tabAt(point);
@@ -256,6 +315,24 @@ void MainWindow::tabContextMenu(const QPoint &point)
     if (tabWidget->tabBar()->tabRect(i).contains(point)) {
         tabWidget->setCurrentIndex(i);
         closeCurrentFile();
+    }
+}
+*/
+
+void MainWindow::tabContextMenu(const QPoint &point)
+{
+    int i = tabWidget->tabBar()->tabAt(point);
+    // иначе отработка также на extraArea
+    if (tabWidget->tabBar()->tabRect(i).contains(point)) {
+        tabWidget->setCurrentIndex(i);
+
+        TMCLOSELEFT->setDisabled(!i);
+        TMCLOSERIGHT->setDisabled(i + 1 == tabWidget->count());
+        TMOTHER->setDisabled(tabWidget->count() == 1);
+        TMSAVE->setDisabled(CURRENT->windowFilePath().isEmpty() || !EDITOR->document()->isModified());
+        TMRENAME->setDisabled(CURRENT->windowFilePath().isEmpty());
+
+        tabMenu->exec(tabWidget->tabBar()->mapToGlobal(point));
     }
 }
 
@@ -273,7 +350,7 @@ void MainWindow::modificationChanged(bool changed)
     }
 
     tabWidget->setTabText(tabWidget->currentIndex(), str);
-    menuActs[0]->setEnabled(changed); // saveAct
+    FMSAVE->setEnabled(changed); // "Save"
 }
 
 void MainWindow::cursorPositionChanged()
@@ -295,7 +372,7 @@ void MainWindow::currentChanged(int i)
         newFile();
     }
 
-    menuActs[0]->setEnabled(EDITOR->document()->isModified()); // saveAct
+    FMSAVE->setEnabled(EDITOR->document()->isModified());
     cursorPositionChanged();
 /*
     connect(EDITOR, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
@@ -327,107 +404,7 @@ void MainWindow::updateRecentFiles()
         }
     }
 
-    menuActs[1]->setVisible(c); // separatorAct
-}
-
-bool MainWindow::maybeSave()
-{
-    if (EDITOR->document()->isModified()) {
-        QMessageBox::StandardButton ret = QMessageBox::warning(this, tr(PROGNAME), tr("Do you want to save your changes?"),
-                                                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (ret == QMessageBox::Save)
-            return saveCurrentFile();
-        
-        if (ret == QMessageBox::Cancel)
-            return false;
-    }
-
-    return true;
-}
-
-void MainWindow::setCurrentFile(QString &name)
-{
-    name = QDir::toNativeSeparators(name);
-
-    tabWidget->setTabText(tabWidget->currentIndex(), QFileInfo(name).fileName());
-    tabWidget->setTabToolTip(tabWidget->currentIndex(), name);   
-    CURRENT->setWindowFilePath(name); // "" для новых файлов
-    CURRENT->setWindowTitle(QFileInfo(name).fileName());
-
-    config->recentFiles.removeAll(name);
-    config->recentFiles.prepend(name);
-
-    if (config->recentFiles.size() > config->maxRecentFiles)
-        config->recentFiles.removeLast();
-
-    lastPath = QFileInfo(name).path();
-}
-
-void MainWindow::loadFile(QString &name)
-{
-    QStringList names = name.split('#');
-    // нет позиции, например загрузка из сессии
-    if (names.count() == 1)
-        names << "0";
-
-    QFile file(names[0]);
-
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot read file %1: %2").arg(name, file.errorString()));
-    } else {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-
-        QTextStream in(&file);
-        in.setCodec("UTF-8");
-
-        EDITOR->setPlainText(in.readAll());
-
-        QTextCursor cursor = EDITOR->textCursor();
-        cursor.setPosition(names[1].toInt());
-        EDITOR->setTextCursor(cursor);
-        EDITOR->centerCursor();
-        modificationChanged(false);
-
-        QApplication::restoreOverrideCursor();
-
-        setCurrentFile(names[0]);
-    }
-}
-
-bool MainWindow::saveCurrentFile(QString &name)
-{
-    QFile file(name);
-
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot write file %1: %2").arg(name, file.errorString()));
-        return false;
-    }
-
-    QTextStream out(&file);
-    out.setCodec("UTF-8");
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    out << EDITOR->toPlainText();
-
-    QApplication::restoreOverrideCursor();
-
-    setCurrentFile(name);
-
-    EDITOR->document()->setModified(false);
-
-    return true;
-}
-
-QString MainWindow::currentPath()
-{
-    if (!CURRENT->windowFilePath().isEmpty() && QDir(QFileInfo(CURRENT->windowFilePath()).path()).exists())
-        return QFileInfo(CURRENT->windowFilePath()).path();
-
-    if (!lastPath.isEmpty() && QDir(lastPath).exists())
-        return lastPath;
-
-    return QDir::homePath();
+    FMSEPARATOR->setVisible(c);
 }
 
 void MainWindow::addDock(QWidget *widget, QAction *action, QString title, Qt::DockWidgetArea area, Qt::DockWidgetAreas areas)
@@ -469,6 +446,80 @@ void MainWindow::about()
                                 arg(PROGNAME, VERSION, QT_VERSION_STR, __DATE__, __TIME__, PROGNAME));
 }
 
+bool MainWindow::saveFile(QString &name)
+{
+    QFile file(name);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot write file %1: %2").arg(name, file.errorString()));
+        return false;
+    }
+
+    QTextStream out(&file);
+    out.setCodec("UTF-8");
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    out << EDITOR->toPlainText();
+
+    QApplication::restoreOverrideCursor();
+
+    setCurrentFile(name);
+
+    EDITOR->document()->setModified(false);
+
+    return true;
+}
+
+void MainWindow::loadFile(QString &name)
+{
+    QStringList names = name.split('#');
+    // нет позиции, например загрузка из сессии
+    if (names.count() == 1)
+        names << "0";
+
+    QFile file(names[0]);
+
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr(PROGNAME), tr("Cannot read file %1: %2").arg(name, file.errorString()));
+    } else {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
+        QTextStream in(&file);
+        in.setCodec("UTF-8");
+
+        EDITOR->setPlainText(in.readAll());
+
+        QTextCursor cursor = EDITOR->textCursor();
+        cursor.setPosition(names[1].toInt());
+        EDITOR->setTextCursor(cursor);
+        EDITOR->centerCursor();
+        modificationChanged(false);
+
+        QApplication::restoreOverrideCursor();
+
+        setCurrentFile(names[0]);
+    }
+}
+
+void MainWindow::setCurrentFile(QString &name)
+{
+    name = QDir::toNativeSeparators(name);
+
+    tabWidget->setTabText(tabWidget->currentIndex(), QFileInfo(name).fileName());
+    tabWidget->setTabToolTip(tabWidget->currentIndex(), name);
+    CURRENT->setWindowFilePath(name); // "" для новых файлов
+    CURRENT->setWindowTitle(QFileInfo(name).fileName());
+
+    config->recentFiles.removeAll(name);
+    config->recentFiles.prepend(name);
+
+    if (config->recentFiles.size() > config->maxRecentFiles)
+        config->recentFiles.removeLast();
+
+    lastPath = QFileInfo(name).path();
+}
+
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     config->openFiles.clear();
@@ -491,6 +542,33 @@ void MainWindow::closeEvent(QCloseEvent *e)
     config->mainWindowGeometry = saveGeometry();
     config->mainWindowState    = saveState();
 }
+
+bool MainWindow::maybeSave()
+{
+    if (EDITOR->document()->isModified()) {
+        QMessageBox::StandardButton ret = QMessageBox::warning(this, tr(PROGNAME), tr("Do you want to save your changes?"),
+                                                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (ret == QMessageBox::Save)
+            return saveFile();
+
+        if (ret == QMessageBox::Cancel)
+            return false;
+    }
+
+    return true;
+}
+
+QString MainWindow::currentPath()
+{
+    if (!CURRENT->windowFilePath().isEmpty() && QDir(QFileInfo(CURRENT->windowFilePath()).path()).exists())
+        return QFileInfo(CURRENT->windowFilePath()).path();
+
+    if (!lastPath.isEmpty() && QDir(lastPath).exists())
+        return lastPath;
+
+    return QDir::homePath();
+}
+
 #ifdef SETSTYLE
 void MainWindow::setStyle()
 {

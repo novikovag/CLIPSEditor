@@ -208,12 +208,12 @@
         <translation>Отображать пробелы и табуляцию</translation>
     </message>
     <message>
-        <location filename="../configdialog.cpp" line="73"/>
+        <location filename="../configdialog.cpp" line="85"/>
         <source>Restart required</source>
         <translation>Требуется перезапуск</translation>
     </message>
     <message>
-        <location filename="../configdialog.cpp" line="73"/>
+        <location filename="../configdialog.cpp" line="85"/>
         <source>The language change will take effect after a restart editor</source>
         <translation>Смена языка вступит в силу после перезапуска редактора</translation>
     </message>
@@ -249,51 +249,51 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="53"/>
         <location filename="../mainwindow.cpp" line="54"/>
+        <location filename="../mainwindow.cpp" line="55"/>
         <source>Sessions</source>
         <translation>Cессии</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="55"/>
         <location filename="../mainwindow.cpp" line="56"/>
+        <location filename="../mainwindow.cpp" line="57"/>
         <source>Snippets</source>
         <translation>Вставка кода</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="57"/>
         <location filename="../mainwindow.cpp" line="58"/>
+        <location filename="../mainwindow.cpp" line="59"/>
         <source>Bookmarks</source>
         <translation>Закладки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="74"/>
+        <location filename="../mainwindow.cpp" line="75"/>
         <source>&amp;Settings</source>
         <translation>Опции</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="76"/>
+        <location filename="../mainwindow.cpp" line="77"/>
         <source>&amp;Help</source>
         <translation>Справка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="113"/>
+        <location filename="../mainwindow.cpp" line="132"/>
         <source>NEW %1</source>
         <translation>НОВЫЙ %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="134"/>
-        <location filename="../mainwindow.cpp" line="177"/>
+        <location filename="../mainwindow.cpp" line="162"/>
+        <location filename="../mainwindow.cpp" line="204"/>
         <source>CLIPS files (*.clp *.bat);;All types (*)</source>
         <translation>Файлы CLIPS (*.clp *.bat);;Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="266"/>
+        <location filename="../mainwindow.cpp" line="308"/>
         <source>Ln: %1 Col: %2 Sel: %3|%4</source>
         <translation>Стр: %1 Cтл: %2 Выд: %3|%4</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="477"/>
+        <location filename="../mainwindow.cpp" line="522"/>
         <source>Style files (*.css);;All types (*)</source>
         <translation></translation>
     </message>
@@ -309,76 +309,104 @@
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="48"/>
+        <location filename="../mainwindow.cpp" line="87"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="49"/>
+        <location filename="../mainwindow.cpp" line="50"/>
+        <location filename="../mainwindow.cpp" line="88"/>
         <source>Save As...</source>
         <translation>Сохранить как...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="50"/>
+        <location filename="../mainwindow.cpp" line="51"/>
         <source>Save All</source>
         <translation>Сохранить все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="51"/>
+        <location filename="../mainwindow.cpp" line="52"/>
         <source>Close All</source>
         <translation>Закрыть все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="60"/>
+        <location filename="../mainwindow.cpp" line="61"/>
         <source>Search &amp;&amp; Replace</source>
         <translation>Поиск и замена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="61"/>
+        <location filename="../mainwindow.cpp" line="62"/>
         <source>Search &amp; Replace</source>
         <translation>Поиск и замена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="73"/>
+        <location filename="../mainwindow.cpp" line="74"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="75"/>
+        <location filename="../mainwindow.cpp" line="76"/>
         <source>Preferences...</source>
         <translation>Настройки...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="77"/>
+        <location filename="../mainwindow.cpp" line="78"/>
         <source>CLIPS Help</source>
         <translation>Справка CLIPS</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="79"/>
+        <location filename="../mainwindow.cpp" line="80"/>
         <source>About...</source>
         <translation>О программе...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="317"/>
+        <location filename="../mainwindow.cpp" line="49"/>
+        <location filename="../mainwindow.cpp" line="83"/>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="84"/>
+        <source>Close All BUT This</source>
+        <translation>Закрыть все, кроме этой</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="85"/>
+        <source>Close All to the Left</source>
+        <translation>Закрыть все Вкладки Слева</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="86"/>
+        <source>Close All to the Right</source>
+        <translation>Закрыть все Вкладки Справа</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="89"/>
+        <source>Rename</source>
+        <translation>Переименовать</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="361"/>
         <source>Do you want to save your changes?</source>
         <translation>Хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="356"/>
+        <location filename="../mainwindow.cpp" line="401"/>
         <source>Cannot read file %1: %2</source>
         <translation>Ошибка чтения файла %1: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="382"/>
+        <location filename="../mainwindow.cpp" line="427"/>
         <source>Cannot write file %1: %2</source>
         <translation>Ошибка записи файла %1: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="442"/>
+        <location filename="../mainwindow.cpp" line="487"/>
         <source>About &quot;%1&quot;</source>
         <translation>О программе &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="443"/>
+        <location filename="../mainwindow.cpp" line="488"/>
         <source>&lt;h3&gt;%1 v%2&lt;/h3&gt;&lt;p&gt;Based on Qt v%3&lt;/p&gt;&lt;p&gt;Built on %4 at %5&lt;/p&gt;&lt;p&gt;Author: &lt;a href=&apos;mailto:novikovag@gmail.com?subject=%6&apos;&gt;Artem G. Novikov&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Project page: &lt;a href=&apos;https://github.com/novikovag/CLIPSEditor&apos;&gt;github&lt;/a&gt;&lt;/p&gt;&lt;p&gt;License: &lt;a href=&apos;http://www.gnu.org/licenses/gpl.html&apos;&gt;GNU GPL v3&lt;/a&gt;&lt;/p&gt;</source>
         <translation>&lt;h3&gt;%1 v%2&lt;/h3&gt;&lt;p&gt;Основан на Qt v%3&lt;/p&gt;&lt;p&gt;Собран %4 в %5&lt;/p&gt;&lt;p&gt;Автор: &lt;a href=&apos;mailto:novikovag@gmail.com?subject=%6&apos;&gt;Новиков Артем Геннадьевич&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Адрес проекта: &lt;a href=&apos;https://github.com/novikovag/CLIPSEdito&apos;&gt;github&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Лицензия: &lt;a href=&apos;http://www.gnu.org/licenses/gpl.html&apos;&gt;GNU GPL v3&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
@@ -457,7 +485,7 @@
         <translation>Ошибка чтения файла %1: %2</translation>
     </message>
     <message>
-        <location filename="../snippets.ui" line="32"/>
+        <location filename="../snippets.ui" line="35"/>
         <source>Path...</source>
         <translation>Путь...</translation>
     </message>

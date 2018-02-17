@@ -44,7 +44,7 @@ CodeEditor::CodeEditor(Config *config)
     reconfig();
 
     menu = new QMenu();
-    // порядок учитывается в contextMenuEvent
+    // индексы учитывается в contextMenuEvent и определены дефайнами
     menu->addAction(tr("Undo"),           this, SLOT(undo()),           QKeySequence::Undo);
     menu->addAction(tr("Redo"),           this, SLOT(redo()),           QKeySequence::Redo);
     menu->addSeparator();
@@ -301,14 +301,13 @@ void CodeEditor::contextMenuEvent(QContextMenuEvent *e)
 {
     QList<QAction *> acts = menu->actions();
 
-    acts[0]->setEnabled(document()->isUndoAvailable());
-    acts[1]->setEnabled(document()->isRedoAvailable());
-    //[2] separator
-    acts[3]->setEnabled(textCursor().hasSelection());
-    acts[4]->setEnabled(textCursor().hasSelection());
-    acts[5]->setEnabled(canPaste());
-    acts[6]->setEnabled(textCursor().hasSelection());
-    acts[7]->setEnabled(!document()->isEmpty());
+    MUNDO->setEnabled(document()->isUndoAvailable());
+    MREDO->setEnabled(document()->isRedoAvailable());
+    MCUT->setEnabled(textCursor().hasSelection());
+    MCOPY->setEnabled(textCursor().hasSelection());
+    MPASTE->setEnabled(canPaste());
+    MDELETE->setEnabled(textCursor().hasSelection());
+    MSELECTALL->setEnabled(!document()->isEmpty());
 
     menu->exec(e->globalPos());
 }
@@ -826,7 +825,6 @@ bool CodeEditor::replace(QString str1, QString str2, int flags)
     }
 
     return true;
-
 }
 
 void CodeEditor::replaceAll(QString str1, QString str2, int flags)

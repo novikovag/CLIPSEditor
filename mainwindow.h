@@ -30,9 +30,18 @@
 #include "snippets.h"
 #include "bookmarks.h"
 
-#define CURRENT   tabWidget->currentWidget()
-#define EDITOR    static_cast<CodeEditor *>(tabWidget->currentWidget())
-#define FSNAME(a) QString("%1#%2").arg(tabWidget->widget(a)->windowFilePath()).arg(EDITOR->textCursor().position())
+//#define TBCLOSE      tabMenu->actions().at(0)
+#define TMOTHER      tabMenu->actions().at(1)
+#define TMCLOSELEFT  tabMenu->actions().at(2)
+#define TMCLOSERIGHT tabMenu->actions().at(3)
+#define TMSAVE       tabMenu->actions().at(4)
+#define TMRENAME     tabMenu->actions().at(6)
+#define FMSAVE       fileMenu->actions().at(2)
+#define FMSEPARATOR  fileMenu->actions().at(18)
+
+#define CURRENT      tabWidget->currentWidget()
+#define EDITOR       static_cast<CodeEditor *>(tabWidget->currentWidget())
+#define FSNAME(a)    QString("%1#%2").arg(tabWidget->widget(a)->windowFilePath()).arg(EDITOR->textCursor().position())
 
 class MainWindow : public QMainWindow
 {
@@ -42,26 +51,25 @@ public:
     MainWindow(Config *);
 
 private slots:
-    void newFile();
-    void openFile(QString = "");
-    void openFiles(QStringList);
-    void openRecentFile() { openFile((static_cast<QAction *>(sender()))->data().toString()); }
-
-    void closeCurrentFile()
-    {
-        if (maybeSave())
-            CURRENT->deleteLater(); // вызывает деструктор Bookmark
-    }
-
-    void dropUrls(QList<QUrl>);
-
 #ifdef SETSTYLE
     void setStyle();
 #endif
-    bool saveCurrentFile();
+    void newFile();
+    void openFile(QString = "");
+    bool saveFile();
     bool saveFileAs();
+    // вызывает деструктор Bookmark
+    void closeFile() { if (maybeSave()) CURRENT->deleteLater(); }
+    void renameFile();
+
+    void dropUrls(QList<QUrl>);
+    void openFiles(QStringList);
+    void openRecentFile() { openFile((static_cast<QAction *>(sender()))->data().toString()); }
     void saveAllFiles();
     void closeAllFiles();
+    void closeLeftFiles();
+    void closeRightFiles();
+    void closeOtherFiles();
 
     void loadSession(QStringList, bool);
     void insertSnippet(QString txt) { EDITOR->insertPlainText(txt); }
@@ -82,17 +90,17 @@ private slots:
     void showDock();
 
 private:
+    bool saveFile(QString &);
+    void loadFile(QString &);
+    void setCurrentFile(QString &);
+
     void closeEvent(QCloseEvent *);
     bool maybeSave();
-    void setCurrentFile(QString &);
-    void loadFile(QString &);
-    bool saveCurrentFile(QString &);
 
     QString currentPath();
 
     void addDock(QWidget *, QAction *, QString, Qt::DockWidgetArea, Qt::DockWidgetAreas = Qt::AllDockWidgetAreas);
 
-    QList<QAction *> menuActs; // [0] - saveAct, [1] - separatorAct
     QList<QAction *> recentFileActs;
 
     int           fileNum;
@@ -111,6 +119,9 @@ private:
     Config       *config;
 
     QLabel       *status;
+
+    QMenu        *fileMenu;
+    QMenu        *tabMenu;
 };
 
 #endif // MAINWINDOW_H

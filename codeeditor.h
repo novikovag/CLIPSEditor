@@ -24,6 +24,14 @@
 #include "config.h"
 #include "highlighter.h"
 
+#define MUNDO      menu->actions().at(0)
+#define MREDO      menu->actions().at(1)
+#define MCUT       menu->actions().at(3)
+#define MCOPY      menu->actions().at(4)
+#define MPASTE     menu->actions().at(5)
+#define MDELETE    menu->actions().at(6)
+#define MSELECTALL menu->actions().at(7)
+
 #define FOLDBOXRECT(cy) QRect(markWidth + lineNumWidth + foldBoxIndent, cy - foldBoxWidth / 2, foldBoxWidth, foldBoxWidth)
 #define FULLRESIZE      resizeEvent(new QResizeEvent(QSize(0, 0), size()))
 #define FONTWIDTH       fontMetrics().width(QLatin1Char('X'))
@@ -80,8 +88,6 @@ public:
 
         void check()
         {
-            qDebug() << num << block.blockNumber();// << currentBlock.blockNumber();
-
             if (block.blockNumber() != num) {
                 if (isActive)
                     emit editor->moveBookmark(this, num);

@@ -26,7 +26,7 @@
 #define ORGNAME  "NovikovAG"
 
 #define PROGNAME "CLIPS Editor"
-#define VERSION  "1.3"
+#define VERSION  "1.4"
 
 class Config : public QSettings
 {
