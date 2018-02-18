@@ -32,7 +32,7 @@ Snippets::Snippets(Config *config)
 
 void Snippets::setPath()
 {
-    QString name = QFileDialog::getExistingDirectory(this, tr("Snippets Directory"), ledPath->text(), QFileDialog::ShowDirsOnly);
+    QString name = QFileDialog::getExistingDirectory(this, tr("Snippets Directory"), lblPath->text(), QFileDialog::ShowDirsOnly);
 
     if (!name.isEmpty())
         readPath(name);
@@ -40,7 +40,7 @@ void Snippets::setPath()
 
 void Snippets::readPath(QString name)
 {
-    ledPath->setText(name);
+    lblPath->setText(name);
 
     lstSnippet->clear();
     tedSnippet->clear();
@@ -77,5 +77,5 @@ void Snippets::readFile(QListWidgetItem *item)
 Snippets::~Snippets()
 {
     config->snippetSplitter = splitter->saveState();
-    config->snippetPath = ledPath->text();
+    config->snippetPath = lblPath->text();
 }

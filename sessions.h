@@ -41,6 +41,7 @@ private slots:
     void remove();
     void select();
     void update();
+    void change(QString) { btnAdd->setEnabled(!ledSession->text().isEmpty()); }
 
     void rename() { lstSessions->editItem(lstSessions->currentItem()); }
 

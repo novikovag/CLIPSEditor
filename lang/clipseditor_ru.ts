@@ -457,12 +457,12 @@
 <context>
     <name>Sessions</name>
     <message>
-        <location filename="../sessions.ui" line="32"/>
+        <location filename="../sessions.ui" line="35"/>
         <source>Leave tabs</source>
         <translation>Оставить вкладки</translation>
     </message>
     <message>
-        <location filename="../sessions.ui" line="22"/>
+        <location filename="../sessions.ui" line="25"/>
         <source>Add</source>
         <translation>Добавить</translation>
     </message>
@@ -475,6 +475,16 @@
         <location filename="../sessions.cpp" line="39"/>
         <source>Remove</source>
         <translation>Удалить</translation>
+    </message>
+    <message>
+        <location filename="../sessions.cpp" line="53"/>
+        <source>The name already exists</source>
+        <translation>Имя уже существует</translation>
+    </message>
+    <message>
+        <location filename="../sessions.cpp" line="53"/>
+        <source>Replace existing session?</source>
+        <translation>Заменить существующую сессию?</translation>
     </message>
     <message>
         <location filename="../sessions.cpp" line="38"/>

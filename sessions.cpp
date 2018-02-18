@@ -39,6 +39,8 @@ Sessions::Sessions(Config *config, QTabWidget *tabWidget)
     menu->addAction(tr("Remove"), this, SLOT(remove()));
 
     connect(btnAdd,      SIGNAL(clicked()),                                  SLOT(add()));
+    connect(ledSession,  SIGNAL(textChanged(QString)),                       SLOT(change(QString)));
+    connect(ledSession,  SIGNAL(returnPressed()),                            SLOT(add()));
     connect(lstSessions, SIGNAL(itemSelectionChanged()),                     SLOT(select()));
     connect(lstSessions, SIGNAL(itemDoubleClicked(QListWidgetItem *)),       SLOT(clicked(QListWidgetItem *)));
     connect(lstSessions, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(clicked(const QPoint &)));
@@ -46,23 +48,34 @@ Sessions::Sessions(Config *config, QTabWidget *tabWidget)
 
 void Sessions::add()
 {
-    if (!ledSession->text().isEmpty() && lstSessions->findItems(ledSession->text(), Qt::MatchExactly).empty()) {
-        QString txt;
+    QList<QListWidgetItem *> items = lstSessions->findItems(ledSession->text(), Qt::MatchExactly);
 
-        for (int i = 0; i < tabWidget->count(); i++)
-            if (!tabWidget->widget(i)->windowFilePath().isEmpty()) {
-                if (i >= 1)
-                    txt += "\n";
+    if (items.count()) {
+        if (QMessageBox::warning(this, tr("The name already exists"), tr("Replace existing session?"),
+                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
+        return;
+        // должен быть только один элемент
+        delete items[0];
+    }
 
-                txt += tabWidget->widget(i)->windowFilePath();
-            }
+    QString txt;
 
-        if (!txt.isEmpty()) {
-            QListWidgetItem *item = new QListWidgetItem(ledSession->text(), lstSessions);
-            item->setData(Qt::UserRole, txt);
-            item->setFlags(item->flags() | Qt::ItemIsEditable);
-            ledSession->clear();
+    for (int i = 0; i < tabWidget->count(); i++)
+        if (!tabWidget->widget(i)->windowFilePath().isEmpty()) {
+            if (i >= 1)
+                txt += "\n";
+
+            txt += tabWidget->widget(i)->windowFilePath();
         }
+
+    if (!txt.isEmpty()) {
+        QListWidgetItem *item = new QListWidgetItem(ledSession->text(), lstSessions);
+        item->setData(Qt::UserRole, txt);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        item->setSelected(true);
+
+        lstSessions->sortItems();
+        ledSession->clear();
     }
 }
 
