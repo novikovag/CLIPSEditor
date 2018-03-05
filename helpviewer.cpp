@@ -38,7 +38,6 @@ HelpViewer::HelpViewer(Config *config) : config(config)
     tebHelp->setOpenLinks(false);     // клик обрабатываем сами
     splitter->setStretchFactor(1, 1); // окно просмотра по максимуму
 
-    setWindowFlags(Qt::WindowCloseButtonHint);
     restoreGeometry(config->helpWindowGeometry);
     loadSource(QUrl("qthelp://clips/doc/release_notes.html"));
 
