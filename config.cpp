@@ -52,7 +52,6 @@ Config::Config()
     beginGroup("Editor");
     fontFamily   = value("fontFamily", "Courier New").toString();
     fontSize     = value("fontSize", 12).toInt();
-    tabIndents   = value("tabIndents").toBool();
     autoIndent   = value("autoIndent").toBool();
     backUnindent = value("backUnindent").toBool();
     spaceTabs    = value("spaceTabs", true).toBool();
@@ -169,7 +168,6 @@ Config::~Config()
     beginGroup("Editor");
     setValue("fontFamily",   fontFamily);
     setValue("fontSize",     fontSize);
-    setValue("tabIndents",   tabIndents);
     setValue("autoIndent",   autoIndent);
     setValue("backUnindent", backUnindent);
     setValue("spaceTabs",    spaceTabs);

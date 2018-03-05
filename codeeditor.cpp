@@ -63,12 +63,12 @@ CodeEditor::CodeEditor(Config *config)
     menu->addAction(tr("UPPERCASE"),      this, SLOT(toUpperCase()),    QKeySequence(Qt::CTRL + Qt::Key_U));
     menu->addAction(tr("lowercase"),      this, SLOT(toLowerCase()),    QKeySequence(Qt::CTRL + Qt::Key_L));
     // не допускаем проваливание на последнем свернутом блоке
-    connect(this,       SIGNAL(cursorPositionChanged()),              SLOT(ensureCursorVisible()));
-    connect(this,       SIGNAL(blockCountChanged(int)),               SLOT(blockCountChanged(int)));
-    connect(document(), SIGNAL(contentsChange(int, int, int)),        SLOT(contentsChange(int, int, int)));
-    connect(completer,  SIGNAL(activated(const QString &)),           SLOT(insertCompletion(const QString &)));
-    connect(config,     SIGNAL(reread(int)),                          SLOT(reconfig(int)));
-    connect(this,       SIGNAL(updateRequest(QRect, int)), extraArea, SLOT(update()));
+    connect(this,       SIGNAL(cursorPositionChanged()),                SLOT(ensureCursorVisible()));
+    connect(this,       SIGNAL(blockCountChanged(int)),                 SLOT(blockCountChanged(int)));
+    connect(document(), SIGNAL(contentsChange(int, int, int)),          SLOT(contentsChange(int, int, int)));
+    connect(completer,  SIGNAL(activated(const QString &)),             SLOT(insertCompletion(const QString &)));
+    connect(config,     SIGNAL(reread(int)),                            SLOT(reconfig(int)));
+    connect(this,       SIGNAL(updateRequest(QRect, int)), extraArea,   SLOT(update()));
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *e)
@@ -143,19 +143,19 @@ void CodeEditor::paintEvent(QPaintEvent *e)
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
     if (e->modifiers() == Qt::CTRL) {
-        if (e->key() == Qt::Key_U)
+        if (e->key() == Qt::Key_U) {
             toUpperCase();
-        else if (e->key() == Qt::Key_L)
+        } else if (e->key() == Qt::Key_L) {
             toLowerCase();
-        else if (e->key() == Qt::Key_Space)
+        } else if (e->key() == Qt::Key_Space) {
             performCompletion();
-        else if (e->key() == Qt::Key_Semicolon)
+        } else if (e->key() == Qt::Key_Semicolon) {
             toggleComment();
-        else if (e->key() == Qt::Key_Equal)
+        } else if (e->key() == Qt::Key_Equal) {
             foldAll();
-        else if (e->key() == Qt::Key_Minus)
+        } else if (e->key() == Qt::Key_Minus) {
             unfoldAll();
-        else if (e->key() == Qt::Key_E) {            // текущий блок
+        } else if (e->key() == Qt::Key_E) {            // текущий блок
             QTextBlock block = textCursor().block(); // const
             foldUnfold(block);
             FULLRESIZE;
@@ -163,41 +163,41 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
 
         return;
     }
- SKIP: // продолжить обработку
-    if (e->key() == Qt::Key_Backspace && config->backUnindent) {
+ SKIP:
+    if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
         QTextCursor cursor = textCursor();
 
-        if (!cursor.hasSelection() && !cursor.atBlockStart() && cursor.block().text().left(cursor.positionInBlock()).trimmed().isEmpty()) {
-            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, qMin(config->indentSize, cursor.positionInBlock()));
-            cursor.removeSelectedText();
-            return;
-        }
-    }
-
-    if (e->key() == Qt::Key_Tab && config->tabIndents) {
-        QTextCursor cursor = textCursor();
+        QTextBlock block;
+        int        end;
 
         if (cursor.hasSelection()) {
-            QTextBlock block = document()->findBlock(cursor.selectionStart());
-
-            int end = document()->findBlock(cursor.selectionEnd()).blockNumber();
-
-            if (end - block.blockNumber()) {
-                cursor.beginEditBlock();
-
-                do {
-                    cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
-                    cursor.insertText(QString().fill(' ', config->indentSize));
-                } while ((block = block.next()).isValid() && block.blockNumber() <= end);
-
-                cursor.endEditBlock();
-                return;
-            }
-
-        } else if (textCursor().block().text().left(textCursor().positionInBlock()).trimmed().isEmpty()) {
-            textCursor().insertText(QString().fill(' ', config->indentSize));
-            return;
+            block = document()->findBlock(cursor.selectionStart());
+            end   = document()->findBlock(cursor.selectionEnd()).blockNumber();
+        } else {
+            block = cursor.block();
+            end   = block.blockNumber();
         }
+
+        cursor.beginEditBlock();
+
+        do {
+            cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
+
+            if (e->key() == Qt::Key_Tab) {
+                cursor.insertText(QString().fill(' ', config->indentSize));
+            } else {
+                int size = block.text().indexOf(QRegExp("[^\\s]"), 0);
+                // учитывать строку из одних пробелов
+                if (size < 0)
+                    size = block.text().length();
+
+                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, qMin(config->indentSize, size));
+                cursor.removeSelectedText();
+            }
+        } while ((block = block.next()).isValid() && block.blockNumber() <= end);
+
+        cursor.endEditBlock();
+        return;
     }
 
     if (e->key() == Qt::Key_Tab && config->spaceTabs) {

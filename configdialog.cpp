@@ -28,10 +28,7 @@ ConfigDialog::ConfigDialog(Config *config)
 
     cmbFont->setCurrentFont(QFont(config->fontFamily));
     spnFontSize->setValue(config->fontSize);
-    chbTabIndents->setChecked(config->tabIndents);
     chbAutoIndent->setChecked(config->autoIndent);
-    chbBackUnindent->setChecked(config->backUnindent);
-    chbSpaceTabs->setChecked(config->spaceTabs);
     spnIndentSize->setValue(config->indentSize);
     spnTabSize->setValue(config->tabSize);
     chbWhitespaces->setChecked(config->whitespaces);
@@ -87,10 +84,7 @@ void ConfigDialog::applay()
     config->language     = cmbLanguage->currentText();
     config->fontFamily   = cmbFont->currentFont().family();
     config->fontSize     = spnFontSize->value();
-    config->tabIndents   = chbTabIndents->isChecked();
     config->autoIndent   = chbAutoIndent->isChecked();
-    config->backUnindent = chbBackUnindent->isChecked();
-    config->spaceTabs    = chbSpaceTabs->isChecked();
     config->tabSize      = spnTabSize->value();
     config->indentSize   = spnIndentSize->value();
     config->whitespaces  = chbWhitespaces->isChecked();

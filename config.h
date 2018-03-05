@@ -72,7 +72,6 @@ public:
     QString     fontFamily;
     int         fontSize;
 
-    bool        tabIndents;
     bool        autoIndent;
     bool        backUnindent;
     bool        spaceTabs;
