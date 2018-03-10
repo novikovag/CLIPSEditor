@@ -71,6 +71,9 @@ private slots:
     void closeRightFiles();
     void closeOtherFiles();
 
+    void trimTrailingSpace() { EDITOR->replaceAll("\\s+$", "", SearchBar::RegExp); }
+    void tabToSpace()        { EDITOR->replaceAll("\\t",  " ", SearchBar::RegExp); }
+
     void loadSession(QStringList, bool);
     void insertSnippet(QString txt) { EDITOR->insertPlainText(txt); }
 

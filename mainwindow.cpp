@@ -40,20 +40,23 @@ MainWindow::MainWindow(Config *config)
     // индексы "Save"[2] и Separator[18] определены дефайнами
     fileMenu    = menuBar()->addMenu(tr("&File"));
     QMenu *menu = fileMenu;
-    connect(menu, SIGNAL(aboutToShow()),    this, SLOT(updateRecentFiles()));
-    menu->addAction(tr("New"),              this, SLOT(newFile()),         QKeySequence::New);
-    menu->addAction(tr("Open..."),          this, SLOT(openFile()),        QKeySequence::Open);
+    connect(menu, SIGNAL(aboutToShow()),       this, SLOT(updateRecentFiles()));
+    menu->addAction(tr("New"),                 this, SLOT(newFile()),       QKeySequence::New);
+    menu->addAction(tr("Open..."),             this, SLOT(openFile()),      QKeySequence::Open);
     // [2]
-    menu->addAction(tr("Save"),             this, SLOT(saveFile()), QKeySequence::Save);
-    menu->addAction(tr("Close"),            this, SLOT(closeFile()), QKeySequence::Close);
-    menu->addAction(tr("Save As..."),       this, SLOT(saveFileAs()),    Qt::CTRL + Qt::ALT + Qt::Key_S);
-    menu->addAction(tr("Save All"),         this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
-    menu->addAction(tr("Close All"),        this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
+    menu->addAction(tr("Save"),                this, SLOT(saveFile()),      QKeySequence::Save);
+    menu->addAction(tr("Close"),               this, SLOT(closeFile()),     QKeySequence::Close);
+    menu->addAction(tr("Save As..."),          this, SLOT(saveFileAs()),    Qt::CTRL + Qt::ALT + Qt::Key_S);
+    menu->addAction(tr("Save All"),            this, SLOT(saveAllFiles()),  Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    menu->addAction(tr("Close All"),           this, SLOT(closeAllFiles()), Qt::CTRL + Qt::SHIFT + Qt::Key_C);
+    menu->addSeparator();
+    menu->addAction(tr("Trim Trailing Space"), this, SLOT(trimTrailingSpace()));
+    menu->addAction(tr("TAB to Space"),        this, SLOT(tabToSpace()));
     menu->addSeparator();
     QAction *action = menu->addAction(tr("Sessions"), this, SLOT(showDock()), Qt::CTRL + Qt::Key_W);
-    addDock(sessions, action, tr("Sessions"),   Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDock(sessions,  action, tr("Sessions"),  Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     action = menu->addAction(tr("Snippets"),    this, SLOT(showDock()), Qt::CTRL + Qt::Key_P);
-    addDock(snippets, action, tr("Snippets"),   Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDock(snippets,  action, tr("Snippets"),  Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     action = menu->addAction(tr("Bookmarks"),   this, SLOT(showDock()), Qt::CTRL + Qt::Key_B);
     addDock(bookmarks, action, tr("Bookmarks"), Qt::LeftDockWidgetArea, Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     menu->addSeparator();

@@ -120,69 +120,54 @@
         <translation>Отступы и табуляция</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="332"/>
-        <source>Indents via tabs</source>
-        <translation>Отступ по клавише TAB</translation>
-    </message>
-    <message>
-        <location filename="../configdialog.ui" line="261"/>
+        <location filename="../configdialog.ui" line="377"/>
         <source>Auto-indentation</source>
         <translation>Автоотступ</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="411"/>
-        <source>Backspace unindentation</source>
-        <translation>Backspace удаляет отступ</translation>
-    </message>
-    <message>
-        <location filename="../configdialog.ui" line="427"/>
-        <source>Use spaces instead of tabs</source>
-        <translation>Пробелы вместо табов</translation>
-    </message>
-    <message>
-        <location filename="../configdialog.ui" line="308"/>
-        <location filename="../configdialog.ui" line="387"/>
-        <location filename="../configdialog.ui" line="488"/>
+        <location filename="../configdialog.ui" line="298"/>
+        <location filename="../configdialog.ui" line="353"/>
+        <location filename="../configdialog.ui" line="436"/>
         <source> ch</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="341"/>
+        <location filename="../configdialog.ui" line="252"/>
         <source>Indent size:</source>
         <translation>Размер отступа:</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="270"/>
+        <location filename="../configdialog.ui" line="315"/>
         <source>Tab size:</source>
         <translation>Размер табуляции:</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="468"/>
+        <location filename="../configdialog.ui" line="416"/>
         <source>Vertical edge columns</source>
         <translation>Вертикальная граница столбцов</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="503"/>
+        <location filename="../configdialog.ui" line="451"/>
         <source>Color Scheme</source>
         <translation>Цветовая схема</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="551"/>
+        <location filename="../configdialog.ui" line="499"/>
         <source>Bold</source>
         <translation>Жирный</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="609"/>
+        <location filename="../configdialog.ui" line="557"/>
         <source>Italic</source>
         <translation>Курсив</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="577"/>
+        <location filename="../configdialog.ui" line="525"/>
         <source>Foreground:</source>
         <translation>Текст:</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="535"/>
+        <location filename="../configdialog.ui" line="483"/>
         <source>Background:</source>
         <translation>Фон:</translation>
     </message>
@@ -208,22 +193,22 @@
     </message>
     <message>
         <location filename="../configdialog.ui" line="39"/>
-        <location filename="../configdialog.ui" line="444"/>
+        <location filename="../configdialog.ui" line="392"/>
         <source>Misc</source>
         <translation>Разное</translation>
     </message>
     <message>
-        <location filename="../configdialog.ui" line="459"/>
+        <location filename="../configdialog.ui" line="407"/>
         <source>Show spaces and tabs</source>
         <translation>Отображать пробелы и табуляцию</translation>
     </message>
     <message>
-        <location filename="../configdialog.cpp" line="85"/>
+        <location filename="../configdialog.cpp" line="82"/>
         <source>Restart required</source>
         <translation>Требуется перезапуск</translation>
     </message>
     <message>
-        <location filename="../configdialog.cpp" line="85"/>
+        <location filename="../configdialog.cpp" line="82"/>
         <source>The language change will take effect after a restart editor</source>
         <translation>Смена языка вступит в силу после перезапуска редактора</translation>
     </message>
@@ -254,56 +239,56 @@
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="81"/>
+        <location filename="../mainwindow.cpp" line="84"/>
         <source>#Set Style...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="53"/>
-        <location filename="../mainwindow.cpp" line="54"/>
+        <location filename="../mainwindow.cpp" line="56"/>
+        <location filename="../mainwindow.cpp" line="57"/>
         <source>Sessions</source>
         <translation>Cессии</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="55"/>
-        <location filename="../mainwindow.cpp" line="56"/>
+        <location filename="../mainwindow.cpp" line="58"/>
+        <location filename="../mainwindow.cpp" line="59"/>
         <source>Snippets</source>
         <translation>Вставка кода</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="57"/>
-        <location filename="../mainwindow.cpp" line="58"/>
+        <location filename="../mainwindow.cpp" line="60"/>
+        <location filename="../mainwindow.cpp" line="61"/>
         <source>Bookmarks</source>
         <translation>Закладки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="74"/>
+        <location filename="../mainwindow.cpp" line="77"/>
         <source>&amp;Settings</source>
         <translation>Опции</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="76"/>
+        <location filename="../mainwindow.cpp" line="79"/>
         <source>&amp;Help</source>
         <translation>Справка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="134"/>
+        <location filename="../mainwindow.cpp" line="137"/>
         <source>NEW %1</source>
         <translation>НОВЫЙ %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="145"/>
-        <location filename="../mainwindow.cpp" line="163"/>
+        <location filename="../mainwindow.cpp" line="148"/>
+        <location filename="../mainwindow.cpp" line="166"/>
         <source>CLIPS files (*.clp *.bat);;All types (*)</source>
         <translation>Файлы CLIPS (*.clp *.bat);;Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="348"/>
+        <location filename="../mainwindow.cpp" line="351"/>
         <source>Ln: %1 Col: %2 Sel: %3|%4</source>
         <translation>Стр: %1 Cтл: %2 Выд: %3|%4</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="563"/>
+        <location filename="../mainwindow.cpp" line="566"/>
         <source>Style files (*.css);;All types (*)</source>
         <translation></translation>
     </message>
@@ -319,13 +304,13 @@
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="47"/>
-        <location filename="../mainwindow.cpp" line="89"/>
+        <location filename="../mainwindow.cpp" line="92"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="49"/>
-        <location filename="../mainwindow.cpp" line="90"/>
+        <location filename="../mainwindow.cpp" line="93"/>
         <source>Save As...</source>
         <translation>Сохранить как...</translation>
     </message>
@@ -340,83 +325,93 @@
         <translation>Закрыть все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="60"/>
+        <location filename="../mainwindow.cpp" line="53"/>
+        <source>Trim Trailing Space</source>
+        <translation>Убрать замыкающие пробелы</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="54"/>
+        <source>TAB to Space</source>
+        <translation>Табуляцию в пробелы</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="63"/>
         <source>Search &amp;&amp; Replace</source>
         <translation>Поиск и замена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="61"/>
+        <location filename="../mainwindow.cpp" line="64"/>
         <source>Search &amp; Replace</source>
         <translation>Поиск и замена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="73"/>
+        <location filename="../mainwindow.cpp" line="76"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="75"/>
+        <location filename="../mainwindow.cpp" line="78"/>
         <source>Preferences...</source>
         <translation>Настройки...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="77"/>
+        <location filename="../mainwindow.cpp" line="80"/>
         <source>CLIPS Help</source>
         <translation>Справка CLIPS</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="79"/>
+        <location filename="../mainwindow.cpp" line="82"/>
         <source>About...</source>
         <translation>О программе...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="48"/>
-        <location filename="../mainwindow.cpp" line="85"/>
+        <location filename="../mainwindow.cpp" line="88"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="86"/>
+        <location filename="../mainwindow.cpp" line="89"/>
         <source>Close All BUT This</source>
         <translation>Закрыть все, кроме этой</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="87"/>
+        <location filename="../mainwindow.cpp" line="90"/>
         <source>Close All to the Left</source>
         <translation>Закрыть все Вкладки Слева</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="88"/>
+        <location filename="../mainwindow.cpp" line="91"/>
         <source>Close All to the Right</source>
         <translation>Закрыть все Вкладки Справа</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="91"/>
+        <location filename="../mainwindow.cpp" line="94"/>
         <source>Rename</source>
         <translation>Переименовать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="537"/>
+        <location filename="../mainwindow.cpp" line="540"/>
         <source>Do you want to save your changes?</source>
         <translation>Хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="472"/>
+        <location filename="../mainwindow.cpp" line="475"/>
         <source>Cannot read file %1: %2</source>
         <translation>Ошибка чтения файла %1: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="442"/>
+        <location filename="../mainwindow.cpp" line="445"/>
         <source>Cannot write file %1: %2</source>
         <translation>Ошибка записи файла %1: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="427"/>
+        <location filename="../mainwindow.cpp" line="430"/>
         <source>About &quot;%1&quot;</source>
         <translation>О программе &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="428"/>
+        <location filename="../mainwindow.cpp" line="431"/>
         <source>&lt;h3&gt;%1 v%2&lt;/h3&gt;&lt;p&gt;Based on Qt v%3&lt;/p&gt;&lt;p&gt;Built on %4 at %5&lt;/p&gt;&lt;p&gt;Author: &lt;a href=&apos;mailto:novikovag@gmail.com?subject=%6&apos;&gt;Artem G. Novikov&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Project page: &lt;a href=&apos;https://github.com/novikovag/CLIPSEditor&apos;&gt;github&lt;/a&gt;&lt;/p&gt;&lt;p&gt;License: &lt;a href=&apos;http://www.gnu.org/licenses/gpl.html&apos;&gt;GNU GPL v3&lt;/a&gt;&lt;/p&gt;</source>
         <translation>&lt;h3&gt;%1 v%2&lt;/h3&gt;&lt;p&gt;Основан на Qt v%3&lt;/p&gt;&lt;p&gt;Собран %4 в %5&lt;/p&gt;&lt;p&gt;Автор: &lt;a href=&apos;mailto:novikovag@gmail.com?subject=%6&apos;&gt;Новиков Артем Геннадьевич&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Адрес проекта: &lt;a href=&apos;https://github.com/novikovag/CLIPSEdito&apos;&gt;github&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Лицензия: &lt;a href=&apos;http://www.gnu.org/licenses/gpl.html&apos;&gt;GNU GPL v3&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
@@ -457,7 +452,7 @@
 <context>
     <name>Sessions</name>
     <message>
-        <location filename="../sessions.ui" line="35"/>
+        <location filename="../sessions.ui" line="38"/>
         <source>Leave tabs</source>
         <translation>Оставить вкладки</translation>
     </message>
@@ -477,12 +472,12 @@
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../sessions.cpp" line="53"/>
+        <location filename="../sessions.cpp" line="54"/>
         <source>The name already exists</source>
         <translation>Имя уже существует</translation>
     </message>
     <message>
-        <location filename="../sessions.cpp" line="53"/>
+        <location filename="../sessions.cpp" line="54"/>
         <source>Replace existing session?</source>
         <translation>Заменить существующую сессию?</translation>
     </message>
