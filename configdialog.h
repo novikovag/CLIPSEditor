@@ -36,13 +36,19 @@ public:
     ConfigDialog(Config *);
 
 private slots:
+    void getFKey(QAction *);
+    void setFKey(QString);
+    void setStyle(bool);
+
     void setFont();
     void setScheme(QListWidgetItem *);
     void setColor();
     void applay();
 
 private:
-     Config* config;
+    QAction *fKeyAction;
+    Config  *config;
+    QString  style;
 };
 
 #endif // CONFIGDIALOG_H

@@ -23,11 +23,9 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QFile file(":/rc/style.css");
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    qApp->setStyleSheet(QLatin1String(file.readAll()));
-
     Config config;
+
+    qApp->setStyleSheet(config.style);
 
     QStringList arguments = QCoreApplication::arguments();
     arguments.removeFirst();

@@ -31,16 +31,44 @@ Config::Config()
     maxHistory 	   = 10;
 
     beginGroup("General");
-    language    	   = value("language", "English").toString();
-    recentFiles 	   = value("recentFiles").toStringList();
+    language = value("language", "English").toString();
 
-    openFiles   	   = value("openFiles").toStringList();
+    style = value("style").toString();
 
-    QMutableStringListIterator si(openFiles);
+    if (style.isEmpty()) {
+        QFile file(":/rc/style.css");
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        style = QLatin1String(file.readAll());
+    }
 
-    while (si.hasNext())
-        if (!QFileInfo(si.next().split('#')[0]).exists())
-            si.remove();
+    fKey     = value("fKey", "F5").toString();
+
+    int size = beginReadArray("fKeys");
+
+    for (int i = 0; i < size; i++) {
+        setArrayIndex(i);
+
+        fKeys.insert(value("key").toString(), value("command").toString());
+    }
+
+    endArray();
+
+    if (!size) {
+        fKeys.insert("F5", "");
+        fKeys.insert("F6", "");
+        fKeys.insert("F7", "");
+        fKeys.insert("F8", "");
+        fKeys.insert("F9", "");
+    }
+
+    recentFiles = value("recentFiles").toStringList();
+    openFiles   = value("openFiles").toStringList();
+
+    QMutableStringListIterator itOpenFiles(openFiles);
+
+    while (itOpenFiles.hasNext())
+        if (!QFileInfo(itOpenFiles.next().split('#')[0]).exists())
+            itOpenFiles.remove();
 
     lastFile  		   = value("lastFile").toString();
 
@@ -60,17 +88,17 @@ Config::Config()
     whitespaces  = value("whitespaces").toBool();
     verticalEdge = value("verticalEdge", 80).toInt();
 
-    QTextCharFormat fmt; // формат по умолчанию, не изменяется
-    fmt.setBackground(QColor(255, 255, 255, 0)) ; // прозрачный белый
+    QTextCharFormat format; // формат по умолчанию, не изменяется
+    format.setBackground(QColor(255, 255, 255, 0)) ; // прозрачный белый
 
-    int size = beginReadArray("ColorScheme");
+    size = beginReadArray("ColorScheme");
 
     for (int i = 0; i < size; i++) {
         setArrayIndex(i);
 
         QString type = value("type").toString();
 
-        colorScheme.insert(type, fmt);
+        colorScheme.insert(type, format);
         colorScheme[type].setFontItalic(value("italic").toBool());
         colorScheme[type].setFontWeight(value("weihgt").toInt());
         colorScheme[type].setForeground(value("foreground").value<QColor>());
@@ -79,18 +107,18 @@ Config::Config()
 
     endArray();
 
-    QHashIterator<QString, QString> hi(keywords.keywords);
+    QHashIterator<QString, QString> itKeywords(keywords.keywords);
 
-    while (hi.hasNext()) {
-        hi.next();
+    while (itKeywords.hasNext()) {
+        itKeywords.next();
 
-        QString keyword = hi.value();
+        QString keyword = itKeywords.value();
 
         keyword.replace("*", "\\*").replace("$", "\\$");
-        patterns.insert(hi.key(), QRegExp(QString("\\b%1\\b").arg(keyword)));
+        patterns.insert(itKeywords.key(), QRegExp(QString("\\b%1\\b").arg(keyword)));
 
-        if (!colorScheme.contains(hi.key())) // для всех слов пустая схема при size == 0
-            colorScheme.insert(hi.key(), fmt);
+        if (!colorScheme.contains(itKeywords.key())) // для всех слов пустая схема при size == 0
+            colorScheme.insert(itKeywords.key(), format);
     }
     // 1. для неключевых слов добавить шаблон
     patterns.insert("Parentheses", 	    QRegExp("[\\(\\)\\[\\]]"));
@@ -99,34 +127,34 @@ Config::Config()
     patterns.insert("Global Variables", QRegExp("\\?\\*[\\w-]+\\*"));
     // 2. настроить схему по умолчанию
     if (!size) {
-        colorScheme.insert("Constructs", fmt);
+        colorScheme.insert("Constructs", format);
         colorScheme["Constructs"].setFontWeight(QFont::Bold);
         colorScheme["Constructs"].setForeground(Qt::darkBlue);
 
-        colorScheme.insert("Strings", fmt);
+        colorScheme.insert("Strings", format);
         colorScheme["Strings"].setForeground(Qt::darkRed);
 
-        colorScheme.insert("Comments", fmt);
+        colorScheme.insert("Comments", format);
         colorScheme["Comments"].setFontItalic(true);
         colorScheme["Comments"].setForeground(Qt::darkGreen);
 
-        colorScheme.insert("Parentheses", fmt);
+        colorScheme.insert("Parentheses", format);
         colorScheme["Parentheses"].setFontWeight(QFont::Bold);
 
-        colorScheme.insert("Numbers", fmt);
+        colorScheme.insert("Numbers", format);
         colorScheme["Numbers"].setForeground(Qt::darkYellow);
 
-        colorScheme.insert("Local Variables", fmt);
+        colorScheme.insert("Local Variables", format);
         colorScheme["Local Variables"].setForeground(Qt::darkYellow);
 
-        colorScheme.insert("Global Variables", fmt);
+        colorScheme.insert("Global Variables", format);
         colorScheme["Global Variables"].setForeground(Qt::darkYellow);
 
-        colorScheme.insert("Text", fmt);
+        colorScheme.insert("Text", format);
         colorScheme["Text"].setForeground(Qt::black);
         colorScheme["Text"].setBackground(Qt::white);
 
-        colorScheme.insert("Line Numbers", fmt);
+        colorScheme.insert("Line Numbers", format);
         colorScheme["Line Numbers"].setForeground(QColor(170, 170, 255));
         colorScheme["Line Numbers"].setBackground(QColor( 75,  75, 112));
     }
@@ -156,14 +184,36 @@ Config::Config()
 Config::~Config()
 {
     beginGroup("General");
-    setValue("language",           language);
+    setValue("language", language);
+
+    setValue("style", style);
+
+    setValue("fKey",  fKey);
+
+    QMapIterator<QString, QString> itFKeys(fKeys);
+
+    beginWriteArray("fKeys");
+
+    int i = 0;
+
+    while (itFKeys.hasNext()) {
+        itFKeys.next();
+
+        setArrayIndex(i++);
+        setValue("key",     itFKeys.key());
+        setValue("command", itFKeys.value());
+    }
+
+    endArray();
+
     setValue("recentFiles",        recentFiles);
     setValue("openFiles",          openFiles);
     setValue("lastFile",           lastFile);
     setValue("mainWindowGeometry", mainWindowGeometry);
     setValue("mainWindowState",    mainWindowState);
     setValue("helpWindowGeometry", helpWindowGeometry);
-    endGroup();
+
+    endGroup(); // General
 
     beginGroup("Editor");
     setValue("fontFamily",   fontFamily);
@@ -176,21 +226,21 @@ Config::~Config()
     setValue("whitespaces",  whitespaces);
     setValue("verticalEdge", verticalEdge);
 
-    QMapIterator<QString, QTextCharFormat> it(colorScheme);
+    QMapIterator<QString, QTextCharFormat> itColorScheme(colorScheme);
 
     beginWriteArray("ColorScheme");
 
-    int i = 0;
+    i = 0;
 
-    while (it.hasNext()) {
-        it.next();
+    while (itColorScheme.hasNext()) {
+        itColorScheme.next();
 
         setArrayIndex(i++);
-        setValue("type",       it.key());
-        setValue("italic",     it.value().font().italic());
-        setValue("weihgt",     it.value().font().weight());
-        setValue("foreground", it.value().foreground());
-        setValue("background", it.value().background());
+        setValue("type",       itColorScheme.key());
+        setValue("italic",     itColorScheme.value().font().italic());
+        setValue("weihgt",     itColorScheme.value().font().weight());
+        setValue("foreground", itColorScheme.value().foreground());
+        setValue("background", itColorScheme.value().background());
     }
 
     endArray();

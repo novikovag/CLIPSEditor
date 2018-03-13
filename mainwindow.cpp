@@ -80,9 +80,6 @@ MainWindow::MainWindow(Config *config)
     menu->addAction(tr("CLIPS Help"),     this, SLOT(help()),  QKeySequence::HelpContents);
     menu->addSeparator();
     menu->addAction(tr("About..."),       this, SLOT(about()));
-#ifdef SETSTYLE
-    menu->addAction(tr("#Set Style..."),    this, SLOT(setStyle()));
-#endif
     // все индексы кроме "Close" и "Save As..." определены дефайнами
     tabMenu = new QMenu(this);
     tabMenu->addAction(tr("Close"),                  this, SLOT(closeFile()));
@@ -145,7 +142,7 @@ void MainWindow::openFile(QString name)
     QStringList names(name);
 
     if (name.isEmpty())
-        names = QFileDialog::getOpenFileNames(this, "", currentPath(), tr("CLIPS files (*.clp *.bat);;All types (*)"));
+        names = QFileDialog::getOpenFileNames(this, "", documentPath(), tr("CLIPS files (*.clp *.bat);;All types (*)"));
 
     openFiles(names);
 }
@@ -162,7 +159,7 @@ bool MainWindow::saveFile()
 
 bool MainWindow::saveFileAs()
 {
-    QString name = QFileDialog::getSaveFileName(this, "", currentPath() + "/" + QFileInfo(CURRENT->windowFilePath()).fileName(),
+    QString name = QFileDialog::getSaveFileName(this, "", documentPath() + "/" + QFileInfo(CURRENT->windowFilePath()).fileName(),
                                                 tr("CLIPS files (*.clp *.bat);;All types (*)"));
     if (name.isEmpty())
         return false;
@@ -511,6 +508,22 @@ void MainWindow::setCurrentFile(QString &name)
     lastPath = QFileInfo(name).path();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() >= Qt::Key_F5 && e->key() <= Qt::Key_F9) {
+        QString command = config->fKeys[QKeySequence(e->key()).toString()];
+
+        if (!command.isEmpty()) {
+            command.replace("CURRENT_PATH", QDir::toNativeSeparators(QDir::currentPath()));
+            command.replace("CURRENT_FILE", QDir::toNativeSeparators(CURRENT->windowFilePath()));
+
+            QProcess::startDetached(command);
+        }
+    }
+
+    QMainWindow::keyPressEvent(e);
+}
+
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     config->openFiles.clear();
@@ -549,7 +562,7 @@ bool MainWindow::maybeSave()
     return true;
 }
 
-QString MainWindow::currentPath()
+QString MainWindow::documentPath()
 {
     if (!CURRENT->windowFilePath().isEmpty() && QDir(QFileInfo(CURRENT->windowFilePath()).path()).exists())
         return QFileInfo(CURRENT->windowFilePath()).path();
@@ -559,15 +572,3 @@ QString MainWindow::currentPath()
 
     return QDir::homePath();
 }
-
-#ifdef SETSTYLE
-void MainWindow::setStyle()
-{
-    QString name = QFileDialog::getOpenFileName(this, "", "", tr("Style files (*.css);;All types (*)"));
-
-    QFile file(name);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-
-    qApp->setStyleSheet(QLatin1String(file.readAll()));
-}
-#endif

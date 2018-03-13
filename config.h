@@ -52,6 +52,11 @@ public:
     QString     language;
     QMap<QString, QString> languages;
 
+    QString                style;
+
+    QString                fKey;
+    QMap<QString, QString> fKeys;
+
     QByteArray  mainWindowGeometry;
     QByteArray  mainWindowState;
     QByteArray  helpWindowGeometry;

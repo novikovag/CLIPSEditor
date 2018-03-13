@@ -51,9 +51,6 @@ public:
     MainWindow(Config *);
 
 private slots:
-#ifdef SETSTYLE
-    void setStyle();
-#endif
     void newFile();
     void openFile(QString = "");
     bool saveFile();
@@ -93,14 +90,16 @@ private slots:
     void showDock();
 
 private:
+    void keyPressEvent(QKeyEvent *);
+    void closeEvent(QCloseEvent *);
+
     bool saveFile(QString &);
     void loadFile(QString &);
     void setCurrentFile(QString &);
 
-    void closeEvent(QCloseEvent *);
     bool maybeSave();
 
-    QString currentPath();
+    QString documentPath();
 
     void addDock(QWidget *, QAction *, QString, Qt::DockWidgetArea, Qt::DockWidgetAreas = Qt::AllDockWidgetAreas);
 

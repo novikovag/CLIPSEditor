@@ -48,14 +48,14 @@ ConfigDialog::ConfigDialog(Config *config)
         QStringList values = config->keywords.keywords.values(it.key());
         values.sort();
 
-        QString tooltip;
+        QString toolTip;
 
         for (int i = 0; i < values.size(); i++)
-            tooltip += values.at(i) + "\n";
+            toolTip += values.at(i) + "\n";
         // убираем самый последний NL
-        tooltip.chop(1);
+        toolTip.chop(1);
 
-        item->setToolTip(tooltip);
+        item->setToolTip(toolTip);
     }
 
     lstScheme->setCurrentRow(0);
@@ -64,14 +64,39 @@ ConfigDialog::ConfigDialog(Config *config)
     chbBold->setChecked(lstScheme->currentItem()->font().bold());
     chbItalic->setChecked(lstScheme->currentItem()->font().italic());
 
+    QMenu *menu = new QMenu();
+
+    foreach (QString fKey, config->fKeys.keys()) {
+        QStringList data;
+        data << fKey << config->fKeys[fKey];
+
+        if (fKey == config->fKey) {
+            fKeyAction = menu->addAction(fKey);
+            fKeyAction->setData(data);
+            tlbFKeys->setText(config->fKey);
+            lneFCommand->setText(config->fKeys[fKey]);
+        } else {
+            menu->addAction(fKey)->setData(data);
+        }
+    }
+
+    lneFCommand->setToolTip("CURRENT_PATH CURRENT_FILE");
+    lneFCommand->setPlaceholderText("cmd.exe /C start C:\\clips\\clipsdos.exe -f CURRENT_PATH\\run.bat");
+
+    tlbFKeys->setMenu(menu);
+
     setWindowFlags(Qt::WindowCloseButtonHint); // Qt::Dialog
     setFixedSize(size());
 
-    connect(tlbForeground, SIGNAL(clicked()), SLOT(setColor()));
-    connect(tlbBackground, SIGNAL(clicked()), SLOT(setColor()));
-    connect(chbBold,       SIGNAL(clicked()), SLOT(setFont()));
-    connect(chbItalic,     SIGNAL(clicked()), SLOT(setFont()));
-    connect(lstScheme,     SIGNAL(itemClicked(QListWidgetItem *)),      SLOT(setScheme(QListWidgetItem *)));
+    connect(menu,            SIGNAL(triggered(QAction *)),              SLOT(getFKey(QAction *)));
+    connect(lneFCommand,     SIGNAL(textEdited(QString)),               SLOT(setFKey(QString)));
+    connect(btnStyle,        SIGNAL(clicked(bool)),                     SLOT(setStyle(bool)));
+    connect(btnStyleDefault, SIGNAL(clicked(bool)),                     SLOT(setStyle(bool)));
+    connect(tlbForeground,   SIGNAL(clicked()),                         SLOT(setColor()));
+    connect(tlbBackground,   SIGNAL(clicked()),                         SLOT(setColor()));
+    connect(chbBold,         SIGNAL(clicked()),                         SLOT(setFont()));
+    connect(chbItalic,       SIGNAL(clicked()),                         SLOT(setFont()));
+    connect(lstScheme,       SIGNAL(itemClicked(QListWidgetItem *)),    SLOT(setScheme(QListWidgetItem *)));
     connect(btnBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), SLOT(applay()));
     connect(btnBox->button(QDialogButtonBox::Ok),    SIGNAL(clicked()), SLOT(applay()));
 }
@@ -81,7 +106,18 @@ void ConfigDialog::applay()
     if (config->language != cmbLanguage->currentText())
         QMessageBox::information(this, tr("Restart required"), tr("The language change will take effect after a restart editor"));
 
-    config->language     = cmbLanguage->currentText();
+    if (config->style != style) {
+        qApp->setStyleSheet(style);
+        config->style = style;
+    }
+
+    config->language = cmbLanguage->currentText();
+
+    foreach (QAction *action, tlbFKeys->menu()->actions()) {
+        QStringList data = action->data().toStringList();
+        config->fKeys[data[0]] = data[1].trimmed();
+    }
+
     config->fontFamily   = cmbFont->currentFont().family();
     config->fontSize     = spnFontSize->value();
     config->autoIndent   = chbAutoIndent->isChecked();
@@ -131,5 +167,44 @@ void ConfigDialog::setColor()
             lstScheme->currentItem()->setBackground(color);
 
         static_cast<QToolButton *>(sender())->setStyleSheet(STYLE(color));
+    }
+}
+
+void ConfigDialog::getFKey(QAction *a)
+{
+    fKeyAction = a;
+
+    QStringList data = fKeyAction->data().toStringList();
+
+    config->fKey = data[0];
+
+    tlbFKeys->setText(data[0]);
+    lneFCommand->setText(data[1]);
+}
+
+void ConfigDialog::setFKey(QString text)
+{
+    QStringList data = fKeyAction->data().toStringList();
+    data[1] = text;
+    fKeyAction->setData(data);
+}
+
+void ConfigDialog::setStyle(bool)
+{
+    if (sender() == btnStyle) {
+        QString name = QFileDialog::getOpenFileName(this, "", "", tr("Style files (*.css);;All types (*)"));
+
+        if (name.isEmpty())
+            return;
+
+        QFile file(name);
+
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            style = QLatin1String(file.readAll());
+
+    } else {
+        QFile file(":/rc/style.css");
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        style = QLatin1String(file.readAll());
     }
 }
