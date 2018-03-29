@@ -438,12 +438,15 @@ void CodeEditor::contextMenuEvent(QContextMenuEvent *e)
 
 void CodeEditor::dropEvent(QDropEvent *e)
 {
-    if (e->mimeData()->hasUrls())
+    if (e->mimeData()->hasUrls()) {
         emit dropUrls(e->mimeData()->urls());
-    // обход бага с исчезающим курсором
-    this->setReadOnly(true);
-    QPlainTextEdit::dropEvent(e);
-    this->setReadOnly(false);
+        // обход бага с исчезающим курсором
+        this->setReadOnly(true);
+        QPlainTextEdit::dropEvent(e);
+        this->setReadOnly(false);
+    } else {
+        QPlainTextEdit::dropEvent(e);
+    }
 }
 
 bool CodeEditor::eventFilter(QObject *obj, QEvent *e)
