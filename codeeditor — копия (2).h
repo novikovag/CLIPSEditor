@@ -149,7 +149,17 @@ private:
     void mouseMoveEvent(QMouseEvent *);
     void mousePressEvent(QMouseEvent *);
     void contextMenuEvent(QContextMenuEvent *);
-    void dropEvent(QDropEvent *);
+    /*
+    void dropEvent(QDropEvent *e)
+    {
+        if (e->mimeData()->hasUrls())
+            emit dropUrls(e->mimeData()->urls());
+        else
+            QPlainTextEdit::dropEvent(e);
+    }
+    */
+    void dropEvent(QDropEvent *e) { e->mimeData()->hasUrls() ? emit dropUrls(e->mimeData()->urls()) : QPlainTextEdit::dropEvent(e); }
+
 
     bool eventFilter(QObject *, QEvent *);
 
@@ -163,10 +173,6 @@ private:
     void foldUnfoldAll(bool = true);
 
     void convertCase(bool toUpper = true) { textCursor().insertText(toUpper ? textCursor().selectedText().toUpper() : textCursor().selectedText().toLower()); }
-
-    void columnSelectionOff();
-    void columnSelectionShift(QChar);
-    void columnSelectionUnshift(QChar);
 
     Highlighter *highlighter;
     QCompleter  *completer;
@@ -190,15 +196,21 @@ private:
 
     QImage       mark;
 
-    QTextCursor  columnStartCursor;
-    QRect        columnStartRect;
-    QRect        columnEndRect;
+    QList<QKeySequence> shortcuts;
+    //---------------------------------
+    void columnSelectionOff();
+    void columnSelectionShift(QChar);
+    void columnSelectionUnShift(QChar);
 
-    bool         columnSelection;
-    int          columnMax;
+    QTextCursor columnStartCursor;
+    QRect       columnStartRect;
+    QRect       columnEndRect;
+
+    bool        columnSelection;
+    int         columnMax;
 
     QList<QTextEdit::ExtraSelection> columnSelections;
-    QList<QString>                   culumnText;
+    QList<QString>                   culumnTexts;
 };
 // конвертация в QVariant
 Q_DECLARE_METATYPE(CodeEditor::Bookmark *)

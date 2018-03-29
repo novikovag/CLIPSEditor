@@ -32,6 +32,9 @@
 #define MDELETE    menu->actions().at(6)
 #define MSELECTALL menu->actions().at(7)
 
+#define CMCUT      columnMenu->actions().at(0)
+#define CMCOPY     columnMenu->actions().at(1)
+
 #define FOLDBOXRECT(cy) QRect(markWidth + lineNumWidth + foldBoxIndent, cy - foldBoxWidth / 2, foldBoxWidth, foldBoxWidth)
 #define FULLRESIZE      resizeEvent(new QResizeEvent(QSize(0, 0), size()))
 #define FONTWIDTH       fontMetrics().width(QLatin1Char('X'))
@@ -149,7 +152,17 @@ private:
     void mouseMoveEvent(QMouseEvent *);
     void mousePressEvent(QMouseEvent *);
     void contextMenuEvent(QContextMenuEvent *);
-    void dropEvent(QDropEvent *);
+    /*
+    void dropEvent(QDropEvent *e)
+    {
+        if (e->mimeData()->hasUrls())
+            emit dropUrls(e->mimeData()->urls());
+        else
+            QPlainTextEdit::dropEvent(e);
+    }
+    */
+    void dropEvent(QDropEvent *e) { e->mimeData()->hasUrls() ? emit dropUrls(e->mimeData()->urls()) : QPlainTextEdit::dropEvent(e); }
+
 
     bool eventFilter(QObject *, QEvent *);
 
@@ -163,10 +176,6 @@ private:
     void foldUnfoldAll(bool = true);
 
     void convertCase(bool toUpper = true) { textCursor().insertText(toUpper ? textCursor().selectedText().toUpper() : textCursor().selectedText().toLower()); }
-
-    void columnSelectionOff();
-    void columnSelectionShift(QChar);
-    void columnSelectionUnshift(QChar);
 
     Highlighter *highlighter;
     QCompleter  *completer;
@@ -190,15 +199,21 @@ private:
 
     QImage       mark;
 
-    QTextCursor  columnStartCursor;
-    QRect        columnStartRect;
-    QRect        columnEndRect;
+    QList<QKeySequence> shortcuts;
+    //---------------------------------
+    void columnSelectionOff();
 
-    bool         columnSelection;
-    int          columnMax;
+    QTextCursor columnStartCursor;
+    QRect       columnStartRect;
+    QRect       columnEndRect;
+
+    bool        columnSelection;
+    int         columnMax;
+
+    QMenu      *columnMenu;
 
     QList<QTextEdit::ExtraSelection> columnSelections;
-    QList<QString>                   culumnText;
+    QList<QString>                   culumnTexts;
 };
 // конвертация в QVariant
 Q_DECLARE_METATYPE(CodeEditor::Bookmark *)

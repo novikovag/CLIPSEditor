@@ -64,6 +64,11 @@ CodeEditor::CodeEditor(Config *config)
     menu->addSeparator();
     menu->addAction(tr("UPPERCASE"),      this, SLOT(toUpperCase()),    QKeySequence(Qt::CTRL + Qt::Key_U));
     menu->addAction(tr("lowercase"),      this, SLOT(toLowerCase()),    QKeySequence(Qt::CTRL + Qt::Key_L));
+
+    columnMenu = new QMenu();
+    // индексы учитываются в contextMenuEvent и определены дефайнами
+    columnMenu->addAction(tr("Cut"),      this, SLOT(cut()));
+    columnMenu->addAction(tr("Copy"),     this, SLOT(copy()));
     // не допускаем проваливание на последнем свернутом блоке
     connect(this,       SIGNAL(cursorPositionChanged()),                SLOT(ensureCursorVisible()));
     connect(this,       SIGNAL(blockCountChanged(int)),                 SLOT(blockCountChanged(int)));
@@ -89,6 +94,33 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
 void CodeEditor::paintEvent(QPaintEvent *e)
 {
     QPlainTextEdit::paintEvent(e);
+
+    if (columnSelection && columnSelections.isEmpty()) {
+        int y1;// = startPoint.y();
+        int y2;// = endPoint.y();
+
+        if (columnStartRect.center().y() < columnEndRect.center().y()) {
+            y1 = columnStartRect.top();
+            y2 = columnEndRect.bottom();
+        } else {
+            y1 = columnStartRect.bottom();
+            y2 = columnEndRect.top();
+        }
+
+        qDebug() << "2" << columnStartRect << columnEndRect;
+
+        QPainter painter(viewport());
+        QPen pen;
+        pen.setStyle(Qt::DashDotLine);
+        pen.setColor(Qt::red);
+        pen.setWidth(2);
+        painter.setPen(pen);
+
+        painter.drawLine(columnStartRect.center().x(), y1, columnStartRect.center().x(), y2);
+    }
+
+    //--------------------------------------------
+
 
     QPainter painter(viewport());
     painter.setPen(Qt::darkGray);
@@ -140,41 +172,87 @@ void CodeEditor::paintEvent(QPaintEvent *e)
         painter.setPen(Qt::gray);
         painter.drawLine(FONTWIDTH * config->verticalEdge, 0, FONTWIDTH * config->verticalEdge, viewport()->height());
     }
-
-    if (columnSelection && columnSelections.isEmpty()) {
-        int y1; // startPoint.y();
-        int y2; // endPoint.y();
-
-        if (columnStartRect.center().y() < columnEndRect.center().y()) {
-            y1 = columnStartRect.top();
-            y2 = columnEndRect.bottom();
-        } else {
-            y1 = columnStartRect.bottom();
-            y2 = columnEndRect.top();
-        }
-
-        QPen pen;
-        pen.setStyle(Qt::DashDotLine);
-        pen.setColor(Qt::red);
-        pen.setWidth(2);
-        painter.setPen(pen);
-
-        painter.drawLine(columnStartRect.center().x(), y1, columnStartRect.center().x(), y2);
-    }
 }
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
-    if (columnSelection) {
-        if (e->key() == Qt::Key_Tab && columnSelections.isEmpty())
-            columnSelectionShift(' ');
-        else if (e->key() == Qt::Key_Backspace && columnSelections.isEmpty())
-            columnSelectionUnshift(' ');
-        else // игнорируем первое нажатие
-            columnSelectionOff();
+    qDebug() << e->key();
 
-        return;
+    if (columnSelection) {
+
+        if (e->key() == Qt::Key_Backspace && columnSelections.isEmpty()) {
+            QTextCursor cursor;
+            int         end;
+            bool        remove = false;
+          L:
+            if (columnStartCursor.blockNumber() < textCursor().blockNumber()) {
+                cursor = columnStartCursor;
+                end    = textCursor().blockNumber();
+            } else {
+                cursor = textCursor();
+                end    = columnStartCursor.blockNumber();
+            }
+
+            while (1) {
+                cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+
+                if (remove)
+                    cursor.removeSelectedText();
+                else if (cursor.selectedText() != " ")
+                    return;
+
+                if (cursor.blockNumber() == end)
+                    break;
+
+                cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor);
+                cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor);
+            }
+
+            if (!remove) {
+                remove = true;
+                goto L;
+            }
+
+            columnStartRect.moveRight(cursorRect().x());
+            columnEndRect.moveRight(cursorRect().x());
+            return;
+        }
+
+        if (e->key() == Qt::Key_Tab && columnSelections.isEmpty()) {
+            QTextCursor cursor;
+            int         end;
+
+            if (columnStartCursor.blockNumber() < textCursor().blockNumber()) {
+                cursor = columnStartCursor;
+                end    = textCursor().blockNumber();
+            } else {
+                cursor = textCursor();
+                end    = columnStartCursor.blockNumber();
+            }
+
+            while (1) {
+                cursor.insertText(" ");
+
+                if (cursor.blockNumber() == end)
+                    break;
+
+                cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor);
+                cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor);
+            }
+
+            //setTextCursor(cursor);
+
+            columnStartRect.moveRight(cursorRect().x());
+            columnEndRect.moveRight(cursorRect().x());
+            return;
+        }
+
+        columnSelectionOff();
     }
+
+    //QPlainTextEdit::keyPressEvent(e);
+
+    //---------------------------------------------------------
 
     if (e->modifiers() == Qt::CTRL) {
         if (e->key() == Qt::Key_U) {
@@ -189,15 +267,15 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             foldAll();
         } else if (e->key() == Qt::Key_Minus) {
             unfoldAll();
-        } else if (e->key() == Qt::Key_E) {          // текущий блок
+        } else if (e->key() == Qt::Key_E) {            // текущий блок
             QTextBlock block = textCursor().block(); // const
             foldUnfold(block);
             FULLRESIZE;
-        } else goto L;
+        } else goto SKIP;
 
         return;
     }
-L:
+ SKIP:
     if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
         QTextCursor cursor = textCursor();
 
@@ -277,7 +355,7 @@ L:
 
 void CodeEditor::mouseMoveEvent(QMouseEvent *e)
 {
-    if (QApplication::keyboardModifiers() == Qt::AltModifier) { // ControlModifier e->button() != Qt::LeftButton &&
+    if (e->button() != Qt::LeftButton && QApplication::keyboardModifiers() == Qt::AltModifier) {
 
         if (!columnSelection) {
             columnSelection   = true;
@@ -294,11 +372,14 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *e)
 
             QTextEdit::ExtraSelection selection;
 
+            //selection.format.setForeground(QColor("white"));
+            //selection.format.setBackground(QColor("blue"));
             selection.format.setBackground(palette().highlight().color());
 
             QTextBlock block = columnStartCursor.block();
 
             while (1) {
+                //qDebug() << block.blockNumber() << blockBoundingGeometry(block) << e->pos();
                 selection.cursor = textCursor();
                 // длина текста блока меньше начальной позиции
                 if (block.length() < columnStartCursor.positionInBlock()) {
@@ -313,6 +394,8 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *e)
 
                 while (1) {
                     setTextCursor(selection.cursor);
+
+                    //qDebug() << block.blockNumber() << selection.cursor.positionInBlock();
 
                     columnEndRect = cursorRect();
 
@@ -358,9 +441,9 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *e)
 
             setExtraSelections(columnSelections);
         }
-
-        viewport()->update();
     }
+
+    //QPlainTextEdit::mouseMoveEvent(e);
 
     QTextBlock block = findBlockByY(e->pos().y());
 
@@ -425,25 +508,22 @@ void CodeEditor::mousePressEvent(QMouseEvent *e)
 
 void CodeEditor::contextMenuEvent(QContextMenuEvent *e)
 {
-    MUNDO->setEnabled(document()->isUndoAvailable());
-    MREDO->setEnabled(document()->isRedoAvailable());
-    MCUT->setEnabled(textCursor().hasSelection());
-    MCOPY->setEnabled(textCursor().hasSelection());
-    MPASTE->setEnabled(canPaste() || !culumnText.isEmpty());
-    MDELETE->setEnabled(!columnSelection && textCursor().hasSelection());
-    MSELECTALL->setEnabled(!document()->isEmpty());
+    if (columnSelection) {
+        CMCUT->setEnabled(!columnSelections.isEmpty());
+        CMCOPY->setEnabled(!columnSelections.isEmpty());
 
-    menu->exec(e->globalPos());
-}
+        columnMenu->exec(e->globalPos());
+    } else {
+        MUNDO->setEnabled(document()->isUndoAvailable());
+        MREDO->setEnabled(document()->isRedoAvailable());
+        MCUT->setEnabled(textCursor().hasSelection());
+        MCOPY->setEnabled(textCursor().hasSelection());
+        MPASTE->setEnabled(canPaste() || !culumnTexts.isEmpty());
+        MDELETE->setEnabled(textCursor().hasSelection());
+        MSELECTALL->setEnabled(!document()->isEmpty());
 
-void CodeEditor::dropEvent(QDropEvent *e)
-{
-    if (e->mimeData()->hasUrls())
-        emit dropUrls(e->mimeData()->urls());
-    // обход бага с исчезающим курсором
-    this->setReadOnly(true);
-    QPlainTextEdit::dropEvent(e);
-    this->setReadOnly(false);
+        menu->exec(e->globalPos());
+    }
 }
 
 bool CodeEditor::eventFilter(QObject *obj, QEvent *e)
@@ -722,7 +802,7 @@ void CodeEditor::contentsChange(int pos, int a, int b)
             int nextBlockState = next.userState();
             setBlockState(next);
             next.setUserState(nextBlockState); // в начальное состояние
-            // правильное состояние комментария станет известно
+            // правильное состояние комментария известно
             // только после обработки последующей строки
             state = block.userState();
         }
@@ -872,212 +952,18 @@ void CodeEditor::toggleComment()
 {
     QTextCursor cursor = textCursor();
 
-    if (columnSelection && columnSelections.isEmpty()) {
-        cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-
-        if (cursor.selectedText() == ";")
-            columnSelectionUnshift(';');
-        else
-            columnSelectionShift(';');
-    } else {
-        int end = document()->findBlock(cursor.selectionEnd()).blockNumber();
-
-        cursor.beginEditBlock();
-
-        for (int i = document()->findBlock(cursor.selectionStart()).blockNumber(); i <= end; i++) {
-            QTextBlock block = document()->findBlockByNumber(i);
-
-            cursor.setPosition(block.position());
-            block.text()[0] == ';' ? cursor.deleteChar() : cursor.insertText(";");
-        }
-
-        cursor.endEditBlock();
-    }
-}
-
-void CodeEditor::columnSelectionOff()
-{
-    qDebug() << "columnSelectionOff";
-    /*
-    QTextCursor cursor = textCursor();
-    cursor.clearSelection();
-    cursor.setPosition(columnStartCursor.position());
-    setTextCursor(cursor);
-    */
-    columnSelections.clear();
-    setExtraSelections(columnSelections);
-
-    columnSelection = false;
-
-    setTextInteractionFlags(Qt::TextEditorInteraction);
-    // форсируем обновление
-    viewport()->update();
-
-    //setMouseTracking(true);
-}
-
-void CodeEditor::columnSelectionShift(QChar mark)
-{
-    QTextCursor cursor;
-    int         end;
-
-    if (columnStartCursor.blockNumber() < textCursor().blockNumber()) {
-        cursor = columnStartCursor;
-        end    = textCursor().blockNumber();
-    } else {
-        cursor = textCursor();
-        end    = columnStartCursor.blockNumber();
-    }
-
-    int column = cursor.positionInBlock();
-
-    QTextBlock block = cursor.block();
+    int end = document()->findBlock(cursor.selectionEnd()).blockNumber();
 
     cursor.beginEditBlock();
 
-    do {
-        if (block.length() < column)
-            continue;
+    for (int i = document()->findBlock(cursor.selectionStart()).blockNumber(); i <= end; i++) {
+        QTextBlock block = document()->findBlockByNumber(i);
 
-        cursor.setPosition(block.position() + column);
-        cursor.insertText(mark);
-    } while ((block = block.next()).isValid() && block.blockNumber() <= end);
+        cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
+        block.text()[0] == ';' ? cursor.deleteChar() : cursor.insertText(";");
+    }
 
     cursor.endEditBlock();
-
-    columnStartRect.moveRight(cursorRect().x());
-    columnEndRect.moveRight(cursorRect().x());
-}
-
-void CodeEditor::columnSelectionUnshift(QChar mark)
-{
-    QTextCursor cursor;
-    int         end;
-    bool        remove = false;
-L:
-    if (columnStartCursor.blockNumber() < textCursor().blockNumber()) {
-        cursor = columnStartCursor;
-        end    = textCursor().blockNumber();
-    } else {
-        cursor = textCursor();
-        end    = columnStartCursor.blockNumber();
-    }
-
-    int column = cursor.positionInBlock();
-
-    QTextBlock block = cursor.block();
-
-    if (remove)
-        cursor.beginEditBlock();
-
-    do {
-        if (block.length() < column - 1)
-            continue;
-
-        cursor.setPosition(block.position() + column);
-        cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-
-        if (remove)
-            cursor.removeSelectedText();
-        else if (cursor.selectedText() != mark)
-            return;
-
-    } while ((block = block.next()).isValid() && block.blockNumber() <= end);
-
-    if (remove) {
-        cursor.endEditBlock();
-    } else {
-        remove = true;
-        goto L;
-    }
-
-    columnStartRect.moveRight(cursorRect().x());
-    columnEndRect.moveRight(cursorRect().x());
-}
-
-void CodeEditor::cut()
-{
-    culumnText.clear();
-
-    if (columnSelection) {
-        QApplication::clipboard()->clear();
-
-        foreach (QTextEdit::ExtraSelection selection, columnSelections) {
-            QString text = selection.cursor.selectedText();
-
-            for (int c = text.length(); c < columnMax; c++)
-                text.append(' ');
-
-            culumnText.append(text);
-
-            selection.cursor.removeSelectedText();
-        }
-
-        columnSelectionOff();
-    } else {
-        QPlainTextEdit::cut();
-    }
-}
-
-void CodeEditor::copy()
-{
-    culumnText.clear();
-
-    if (columnSelection) {
-        QApplication::clipboard()->clear();
-
-        foreach (QTextEdit::ExtraSelection selection, columnSelections) {
-            QString text = selection.cursor.selectedText();
-            // только не пустые блоки добиваются пробелами
-            if (!text.isEmpty())
-                for (int c = text.length(); c < columnMax; c++)
-                    text.append(' ');
-
-            culumnText.append(text);
-        }
-    } else {
-        QPlainTextEdit::copy();
-    }
-}
-
-void CodeEditor::paste()
-{
-    if (culumnText.empty()) {
-        QPlainTextEdit::paste();
-    } else {
-        QTextCursor cursor = textCursor();
-        QTextBlock  block  = cursor.block();
-
-        int column = cursor.positionInBlock();
-
-        int i = 0;
-
-        cursor.beginEditBlock();
-
-        while (1) {
-            // позиция первого блока всегда валидна
-            cursor.insertText(culumnText[i++]);
-
-            if (i == culumnText.count())
-                break;
-
-            block = block.next();
-            // пропуск пустых селектов
-            if (culumnText[i].isEmpty())
-                continue;
-
-            if (block.text().length() < column) {
-                cursor.setPosition(block.position() + block.text().length());
-
-                for (int c = block.text().length(); c < column; c++)
-                    cursor.insertText(" ");
-            } else {
-                cursor.setPosition(block.position() + column);
-            }
-        }
-
-        cursor.endEditBlock();
-    }
 }
 
 QTextBlock CodeEditor::findBlockByY(int y)
@@ -1210,6 +1096,124 @@ void CodeEditor::reconfig(int receiver)
         FULLRESIZE;
     }
 }
+
 // для упорядочивания в QListWidget с Qt::UserRole, копирование данных не используется
 QDataStream &operator<<(QDataStream &out, const CodeEditor::Bookmark *obj) { return out; }
 QDataStream &operator>>(QDataStream &in, CodeEditor::Bookmark *obj) { return in; }
+
+//---------------------------------------
+
+void CodeEditor::cut()
+{
+    qDebug() << "cut " << columnSelection;
+
+    culumnTexts.clear();
+
+    if (static_cast<QAction *>(sender())->parentWidget() == menu) {
+        QPlainTextEdit::cut();
+    } else if (columnSelection) {
+        QApplication::clipboard()->clear();
+
+        foreach (QTextEdit::ExtraSelection selection, columnSelections) {
+            QString text = selection.cursor.selectedText();
+
+            for (int c = text.length(); c < columnMax; c++)
+                text.append(' ');
+
+            culumnTexts.append(text);
+
+            selection.cursor.removeSelectedText();
+        }
+
+        columnSelectionOff();
+    }
+}
+
+void CodeEditor::copy()
+{
+    qDebug() << "copy";
+
+    culumnTexts.clear();
+
+    if (static_cast<QAction *>(sender())->parentWidget() == menu) {
+        QPlainTextEdit::copy();
+    } else if (columnSelection) {
+        QApplication::clipboard()->clear();
+
+        foreach (QTextEdit::ExtraSelection selection, columnSelections) {
+            QString text = selection.cursor.selectedText();
+
+            for (int c = text.length(); c < columnMax; c++)
+                text.append(' ');
+
+            culumnTexts.append(text);
+        }
+    }
+}
+
+void CodeEditor::paste()
+{
+    /* Нужно отличать от простого скопированного текста */
+    qDebug() << "paste";
+
+    if (culumnTexts.empty()) {
+        QPlainTextEdit::paste();
+    } else {
+        QTextCursor cursor = textCursor();
+        QTextBlock  block  = cursor.block();
+
+        int startBlockPosition = cursor.positionInBlock();
+        int startPosition;
+
+        int i = 0;
+
+        while (1) {
+            cursor.insertText(culumnTexts[i++]);
+
+            if (i == 1)
+                startPosition = cursor.position();
+
+            if (i == culumnTexts.count())
+                break;
+
+            cursor.setPosition(block.position() + startBlockPosition);
+
+            block = block.next();
+
+            if (!block.isValid()) {
+                cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+                cursor.insertText("\n");
+            } else {
+                cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor);
+            }
+
+            for (int c = block.text().length(); c < startBlockPosition; c++)
+                cursor.insertText(" ");
+        }
+
+        cursor.setPosition(startPosition);
+        setTextCursor(cursor);
+    }
+}
+
+void CodeEditor::columnSelectionOff()
+{
+    qDebug() << "columnSelectionOff";
+    /*
+    QTextCursor cursor = textCursor();
+    cursor.clearSelection();
+    cursor.setPosition(columnStartCursor.position());
+    setTextCursor(cursor);
+    */
+    columnSelections.clear();
+    setExtraSelections(columnSelections);
+
+    columnSelection = false;
+
+    setTextInteractionFlags(Qt::TextEditorInteraction);
+    // форсируем обновление
+    viewport()->update();
+
+    //setMouseTracking(true);
+}
+

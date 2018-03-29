@@ -50,7 +50,7 @@ void Sessions::add()
 {
     QList<QListWidgetItem *> items = lstSessions->findItems(ledSession->text(), Qt::MatchExactly);
 
-    if (items.count()) {
+    if (!items.empty()) {// count()) {
         if (QMessageBox::warning(this, tr("The name already exists"), tr("Replace existing session?"),
                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
         return;

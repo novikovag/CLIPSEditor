@@ -26,6 +26,7 @@ MainWindow::MainWindow(Config *config)
     tabWidget = new QTabWidget(this);
     tabWidget->setMovable(true);
     tabWidget->setContextMenuPolicy(Qt::CustomContextMenu); // прехват правой кнопки
+    tabWidget->setFocusPolicy(Qt::ClickFocus); // убираем перехват tab используемый для сдвига при выделения столбцом
 
     sessions     = new Sessions(config, tabWidget);
     snippets     = new Snippets(config);
@@ -116,23 +117,23 @@ MainWindow::MainWindow(Config *config)
     connect(snippets,  SIGNAL(insert(QString)),                            SLOT(insertSnippet(QString)));
     connect(searchBar, SIGNAL(searchReplace(QString, QString, int)),       SLOT(searchReplace(QString, QString, int)));
 
-    tabWidget->tabBar()->setAccessibleName("one"); 
+    tabWidget->tabBar()->setAccessibleName("one");
 }
 
 void MainWindow::newFile()
 {
     CodeEditor *codeEditor = new CodeEditor(config);
 
-    connect(codeEditor, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
-    connect(codeEditor, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()),   Qt::UniqueConnection);
-    connect(codeEditor, SIGNAL(dropUrls(QList<QUrl>)),     SLOT(dropUrls(QList<QUrl>)), Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)));
+    connect(codeEditor, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()));
+    connect(codeEditor, SIGNAL(dropUrls(QList<QUrl>)),     SLOT(dropUrls(QList<QUrl>)));
 
-    connect(codeEditor, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)),       Qt::UniqueConnection);
-    connect(codeEditor, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)), Qt::UniqueConnection);
-    connect(codeEditor, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)),    Qt::UniqueConnection);
+    connect(codeEditor, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)));
+    connect(codeEditor, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)));
+    connect(codeEditor, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)));
 
     QString name = tr("NEW %1").arg(++fileNum);
-    //addTab(...) не устанавливает windowTitle
+    // addTab(...) не устанавливает windowTitle
     tabWidget->setCurrentIndex(tabWidget->addTab(codeEditor, name));
     CURRENT->setWindowTitle(name);
 }
@@ -190,7 +191,7 @@ void MainWindow::dropUrls(QList<QUrl> urls)
     L:;
     }
 
-    if (names.count())
+    if (!names.isEmpty()) //names.count())
         openFiles(names);
 }
 
@@ -227,7 +228,6 @@ void MainWindow::closeAllFiles()
 
     for (int i = 0; i < tabWidget->count(); i++)
         tabWidget->widget(i)->deleteLater(); // вызывает деструктор Bookmark
-        // tabWidget->removeTab(i);
 }
 
 void MainWindow::closeLeftFiles()
@@ -362,15 +362,6 @@ void MainWindow::currentChanged(int i)
 
     FMSAVE->setEnabled(EDITOR->document()->isModified());
     cursorPositionChanged();
-/*
-    connect(EDITOR, SIGNAL(modificationChanged(bool)), SLOT(modificationChanged(bool)), Qt::UniqueConnection);
-    connect(EDITOR, SIGNAL(cursorPositionChanged()),   SLOT(cursorPositionChanged()),   Qt::UniqueConnection);
-    connect(EDITOR, SIGNAL(dropUrls(QList<QUrl>)),     SLOT(dropUrls(QList<QUrl>)), Qt::UniqueConnection);
-
-    connect(EDITOR, SIGNAL(addBookmark(CodeEditor::Bookmark *)),       bookmarks, SLOT(addBookmark(CodeEditor::Bookmark *)),       Qt::UniqueConnection);
-    connect(EDITOR, SIGNAL(moveBookmark(CodeEditor::Bookmark *, int)), bookmarks, SLOT(moveBookmark(CodeEditor::Bookmark *, int)), Qt::UniqueConnection);
-    connect(EDITOR, SIGNAL(removeBookmark(CodeEditor::Bookmark *)),    bookmarks, SLOT(removeBookmark(CodeEditor::Bookmark *)),    Qt::UniqueConnection);
-*/
 }
 
 void MainWindow::updateRecentFiles()
@@ -482,11 +473,11 @@ void MainWindow::loadFile(QString &name)
         cursor.setPosition(names[1].toInt());
         EDITOR->setTextCursor(cursor);
         EDITOR->centerCursor();
+
+        setCurrentFile(names[0]);
         modificationChanged(false);
 
         QApplication::restoreOverrideCursor();
-
-        setCurrentFile(names[0]);
     }
 }
 
