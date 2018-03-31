@@ -29,7 +29,6 @@ ConfigDialog::ConfigDialog(Config *config)
     cmbFont->setCurrentFont(QFont(config->fontFamily));
     spnFontSize->setValue(config->fontSize);
     chbAutoIndent->setChecked(config->autoIndent);
-    spnIndentSize->setValue(config->indentSize);
     spnTabSize->setValue(config->tabSize);
     chbWhitespaces->setChecked(config->whitespaces);
     spnVerticalEdge->setValue(config->verticalEdge);
@@ -122,7 +121,6 @@ void ConfigDialog::applay()
     config->fontSize     = spnFontSize->value();
     config->autoIndent   = chbAutoIndent->isChecked();
     config->tabSize      = spnTabSize->value();
-    config->indentSize   = spnIndentSize->value();
     config->whitespaces  = chbWhitespaces->isChecked();
     config->verticalEdge = spnVerticalEdge->value();
 

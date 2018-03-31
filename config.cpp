@@ -82,8 +82,6 @@ Config::Config()
     fontSize     = value("fontSize", 12).toInt();
     autoIndent   = value("autoIndent").toBool();
     backUnindent = value("backUnindent").toBool();
-    spaceTabs    = value("spaceTabs", true).toBool();
-    indentSize   = value("indentSize", 4).toInt();
     tabSize      = value("tabSize", 4).toInt();
     whitespaces  = value("whitespaces").toBool();
     verticalEdge = value("verticalEdge", 80).toInt();
@@ -220,8 +218,6 @@ Config::~Config()
     setValue("fontSize",     fontSize);
     setValue("autoIndent",   autoIndent);
     setValue("backUnindent", backUnindent);
-    setValue("spaceTabs",    spaceTabs);
-    setValue("indentSize",   indentSize);
     setValue("tabSize",      tabSize);
     setValue("whitespaces",  whitespaces);
     setValue("verticalEdge", verticalEdge);

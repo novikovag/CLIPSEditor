@@ -79,9 +79,7 @@ public:
 
     bool        autoIndent;
     bool        backUnindent;
-    bool        spaceTabs;
 
-    int         indentSize;
     int         tabSize;
 
     bool        whitespaces;

@@ -198,44 +198,60 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         return;
     }
 L:
-    if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
+    if (e->key() == Qt::Key_Tab) {
         QTextCursor cursor = textCursor();
-
-        QTextBlock block;
-        int        end;
-
-        if (cursor.hasSelection()) {
-            block = document()->findBlock(cursor.selectionStart());
-            end   = document()->findBlock(cursor.selectionEnd()).blockNumber();
-        } else {
-            block = cursor.block();
-            end   = block.blockNumber();
-        }
 
         cursor.beginEditBlock();
 
-        do {
-            cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
+        if (cursor.hasSelection()) {
+            QTextBlock block = document()->findBlock(cursor.selectionStart());
+            int        end   = document()->findBlock(cursor.selectionEnd()).blockNumber();
 
-            if (e->key() == Qt::Key_Tab) {
-                cursor.insertText(QString().fill(' ', config->indentSize));
-            } else {
-                int size = block.text().indexOf(QRegExp("[^\\s]"), 0);
-                // учитывать строку из одних пробелов
-                if (size < 0)
-                    size = block.text().length();
+            do {
+                cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
+                cursor.insertText(QString().fill(' ', config->tabSize));
+            } while ((block = block.next()).isValid() && block.blockNumber() <= end);
 
-                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, qMin(config->indentSize, size));
-                cursor.removeSelectedText();
-            }
-        } while ((block = block.next()).isValid() && block.blockNumber() <= end);
+        } else {
+            cursor.insertText(QString().fill(' ', config->tabSize));
+        }
 
         cursor.endEditBlock();
         return;
     }
 
-    if (e->key() == Qt::Key_Tab && config->spaceTabs) {
-        textCursor().insertText(QString().fill(' ', config->tabSize));
+    if (e->key() == Qt::Key_Backtab) {
+        QTextCursor cursor = textCursor();
+
+        cursor.beginEditBlock();
+
+        if (cursor.hasSelection()) {
+            QTextBlock block = document()->findBlock(cursor.selectionStart());
+            int        end   = document()->findBlock(cursor.selectionEnd()).blockNumber();
+
+            do {
+                cursor.setPosition(block.position(), QTextCursor::MoveAnchor);
+                // находим позицию первого не пробельного символа в блоке
+                int size = block.text().indexOf(QRegExp("[^\\s]"), 0);
+                // учитывать строку из одних пробелов
+                if (size < 0)
+                    size = block.text().length();
+
+                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, qMin(config->tabSize, size));
+                cursor.removeSelectedText();
+            } while ((block = block.next()).isValid() && block.blockNumber() <= end);
+
+        } else if (cursor.positionInBlock()) {
+            int size = cursor.block().text().lastIndexOf(QRegExp("[^\\s]"), cursor.positionInBlock() - 1);
+
+            size = size < 0 ? qMin(config->tabSize, cursor.positionInBlock()) :
+                              qMin(config->tabSize, cursor.positionInBlock() - 1 - size);
+
+            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, size);
+            cursor.removeSelectedText();
+        }
+
+        cursor.endEditBlock();
         return;
     }
 
@@ -268,7 +284,7 @@ L:
             int previousBlockState = textCursor().block().previous().userState();
 
             if (!(previousBlockState & Error) && previousBlockState & Begin)
-                i += config->indentSize;
+                i += config->tabSize;
 
             textCursor().insertText(QString().fill(' ', i));
         }
