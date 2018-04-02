@@ -266,27 +266,22 @@ L:
                 return;
         }
 
+
     QPlainTextEdit::keyPressEvent(e);
 
     if (completer->popup()->isVisible())
         performCompletion();
 
-    if (e->key() == Qt::Key_Return && config->autoIndent) {
-        int state = textCursor().block().userState();
+    if (e->key() == Qt::Key_Return) {
+        int previousBlockState = textCursor().block().previous().userState();
+        int nextBlockState     = textCursor().block().next().userState();
 
-        if (!(state & Error) && (state & Nested)) {
-            QString txt = textCursor().block().previous().text();
-
-            int i = 0;
-
-            while (txt[i].isSpace()) ++i;
-
-            int previousBlockState = textCursor().block().previous().userState();
-
-            if (!(previousBlockState & Error) && previousBlockState & Begin)
-                i += config->tabSize;
-
-            textCursor().insertText(QString().fill(' ', i));
+        if (previousBlockState > 0 && previousBlockState & Comment &&
+            nextBlockState     > 0 && nextBlockState     & Comment) {
+            textCursor().insertText(";");
+        } else if (config->autoIndent && (previousBlockState & Begin || previousBlockState & Nested)) {
+            int size = textCursor().block().previous().text().indexOf(QRegExp("[^\\s]"), 0);
+            textCursor().insertText(QString().fill(' ', size));
         }
     }
 }
@@ -597,7 +592,7 @@ int CodeEditor::setBlockState(QTextBlock &block)
 
     if (txt[i] == ';') {
         if (!previousBraceDepth || previousBlockState & Comment) {
-            state |= Comment; // только за предалами блока кода
+            state |= Comment; // только за пределами блока кода
 
             if (previousBlockState & Comment) {
                 if (braceDepth) {
