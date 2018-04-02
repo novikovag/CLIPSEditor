@@ -266,7 +266,6 @@ L:
                 return;
         }
 
-
     QPlainTextEdit::keyPressEvent(e);
 
     if (completer->popup()->isVisible())
@@ -275,9 +274,14 @@ L:
     if (e->key() == Qt::Key_Return) {
         int previousBlockState = textCursor().block().previous().userState();
         int nextBlockState     = textCursor().block().next().userState();
+        // нет предыдущего блока userState() == -1 & Comment == TRUE
+        if (previousBlockState < 0)
+            previousBlockState = 0;
+        // нет следующего блока userState() == -1
+        if (nextBlockState < 0)
+            nextBlockState = 0;
 
-        if (previousBlockState > 0 && previousBlockState & Comment &&
-            nextBlockState     > 0 && nextBlockState     & Comment) {
+        if (previousBlockState & Comment && nextBlockState & Comment) {
             textCursor().insertText(";");
         } else if (config->autoIndent && (previousBlockState & Begin || previousBlockState & Nested)) {
             int size = textCursor().block().previous().text().indexOf(QRegExp("[^\\s]"), 0);
