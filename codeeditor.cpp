@@ -1197,7 +1197,7 @@ void CodeEditor::reconfig(int receiver)
     font.setItalic(fmt.font().italic());
     setFont(font);
     // при стилях, QPalette не работает,
-    // также слетают стили QScrollBar у редактора
+    // так же слетают стили QScrollBar у редактора
     setStyleSheet(QString("color: %1; background-color: %2").arg(fmt.foreground().color().name()).arg(fmt.background().color().name()));
 
     fmt = config->colorScheme["Line Numbers"];
